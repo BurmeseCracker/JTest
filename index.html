@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kanji Card Quiz</title>
+    <style>
+        body { 
+            font-family: sans-serif; 
+            text-align: center; 
+            background: #f0f2f5; 
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        
+        #timer { 
+            font-size: 20px; 
+            font-weight: bold; 
+            color: #F44336; 
+            margin-bottom: 10px; 
+        }
+
+        .quiz-header h2 {
+            margin: 5px 0;
+            color: #333;
+            font-size: 24px;
+        }
+
+        .cards-container { 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            gap: 10px; 
+            margin-bottom: 25px; 
+            flex-wrap: wrap; 
+        }
+
+        .card { 
+            background: white; 
+            width: 85px; 
+            height: 105px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 45px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: 0.2s;
+            user-select: none;
+        }
+
+        .card:hover { transform: scale(1.05); background: #fafafa; }
+
+        .question-wrapper {
+            margin-bottom: 20px;
+        }
+
+        #questionBox { 
+            font-size: 24px; 
+            font-weight: bold; 
+            color: #2c3e50; 
+            background: #fff;
+            display: inline-block;
+            padding: 12px 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            max-width: 90%;
+        }
+
+        .correct { background: #4CAF50 !important; color: white; border-color: #2e7d32; }
+        .wrong { background: #F44336 !important; color: white; border-color: #c62828; }
+        
+        #result { margin-top: 15px; font-size: 18px; font-weight: bold; }
+        
+        #nextBtn { 
+            margin-top: 15px; 
+            padding: 12px 25px; 
+            font-size: 16px; 
+            cursor: pointer; 
+            display: none; 
+            background-color: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        #nextBtn:hover { background-color: #0b7dda; }
+
+        @media (max-width: 480px) {
+            .card { width: 75px; height: 95px; font-size: 38px; }
+            #questionBox { font-size: 20px; padding: 10px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="timer">အချိန်: 5 စက္ကန့်</div>
+
+    <div class="quiz-header">
+        <h2>Kanji Card Quiz</h2>
+    </div>
+    
+    <div class="cards-container" id="cardsContainer"></div>
+
+    <div class="question-wrapper">
+        <div id="questionBox">မေးခွန်းပေါ်မည်</div>
+    </div>
+
+    <div id="result"></div>
+    <div>
+        <button id="nextBtn" onclick="nextQuiz()">နောက်တစ်ပုဒ်သို့ (Next)</button>
+    </div>
+
+    <!-- kanji.js နဲ့ quiz.js ကို ချိတ်ဆက်ခြင်း -->
+    <script src="kanji.js"></script>
+    <script src="quiz.js"></script>
+    
+    <script>
+        let quizDatabase = [];
+
+        // window ထဲကနေ လှမ်းယူပြီး ပေါင်းစပ်ခြင်း
+        let kanjis = window.kanjiLists || [];
+        let questions = window.questionLists || [];
+
+        for (let i = 0; i < kanjis.length; i++) {
+            if (kanjis[i] && questions[i]) {
+                quizDatabase.push({
+                    kanjis: kanjis[i],
+                    question: questions[i],
+                    correctIndex: 0
+                });
+            }
+        }
+
+        let currentIndex = 0;
+        let timeLeft = 5;
+        let timerInterval;
+        let isAnswered = false;
+        let currentCorrectOriginalKanji = "";
+
+        function shuffleArray(array) {
+            let shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                let j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        function loadQuiz() {
+            if (quizDatabase.length === 0) {
+                document.getElementById("questionBox").innerText = "kanji.js သို့မဟုတ် quiz.js ဒေတာများကို ဖတ်မရပါ။";
+                return;
+            }
+
+            clearInterval(timerInterval);
+            timeLeft = 5;
+            isAnswered = false;
+            document.getElementById("timer").innerText = "အချိန်: " + timeLeft + " စက္ကန့်";
+            
+            let current = quizDatabase[currentIndex];
+            document.getElementById("questionBox").innerText = current.question;
+            document.getElementById("result").innerText = "";
+            document.getElementById("nextBtn").style.display = "none";
+
+            currentCorrectOriginalKanji = current.kanjis[current.correctIndex];
+            let randomizedKanjis = shuffleArray(current.kanjis);
+
+            let cardsContainer = document.getElementById("cardsContainer");
+            cardsContainer.innerHTML = "";
+            
+            randomizedKanjis.forEach((kanjiChar, index) => {
+                let cardDiv = document.createElement("div");
+                cardDiv.className = "card";
+                cardDiv.id = "card-" + index;
+                cardDiv.innerText = kanjiChar;
+                cardDiv.onclick = () => selectCard(kanjiChar, currentCorrectOriginalKanji, index);
+                cardsContainer.appendChild(cardDiv);
+            });
+
+            startTimer();
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById("timer").innerText = "အချိန်: " + timeLeft + " စက္ကန့်";
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    if (!isAnswered) {
+                        timeOutAction();
+                    }
+                }
+            }, 1000);
+        }
+
+        function selectCard(selectedKanji, correctKanji, clickedIndex) {
+            if (isAnswered) return;
+            isAnswered = true;
+            clearInterval(timerInterval);
+
+            let cards = document.getElementsByClassName("card");
+            for (let i = 0; i < cards.length; i++) {
+                if (cards[i].innerText === correctKanji) {
+                    cards[i].classList.add("correct");
+                }
+            }
+
+            if (selectedKanji === correctKanji) {
+                document.getElementById("result").style.color = "#4CAF50";
+                document.getElementById("result").innerText = "မှန်ကန်ပါတယ်! 🎉";
+            } else {
+                cards[clickedIndex].classList.add("wrong");
+                document.getElementById("result").style.color = "#F44336";
+                document.getElementById("result").innerText = "အဖြေမှားယွင်းနေပါတယ် ❌";
+            }
+
+            document.getElementById("nextBtn").style.display = "inline-block";
+        }
+
+        function timeOutAction() {
+            isAnswered = true;
+            let cards = document.getElementsByClassName("card");
+
+            for (let i = 0; i < cards.length; i++) {
+                if (cards[i].innerText === currentCorrectOriginalKanji) {
+                    cards[i].classList.add("correct");
+                }
+            }
+
+            document.getElementById("timer").innerText = "အချိန်ကုန်သွားပါပြီ ⌛";
+            document.getElementById("result").style.color = "#F44336";
+            document.getElementById("result").innerText = "အချိန်ကုန်သွားပါပြီ ❌";
+            
+            document.getElementById("nextBtn").style.display = "inline-block";
+        }
+
+        function nextQuiz() {
+            currentIndex = (currentIndex + 1) % quizDatabase.length;
+            loadQuiz();
+        }
+
+        loadQuiz();
+    </script>
+</body>
+</html>
