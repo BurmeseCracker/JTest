@@ -134,16 +134,17 @@ function addQuizSet() {
     let hiraganaRows = document.getElementsByClassName("hiragana-input-row");
     let newSetsCount = 0;
 
+    // ခေါင်းစဉ်ဘေးမှ Global Hardcore Switch ၏ အခြေအနေကို ယူမည်
+    let isHardcore = document.getElementById("globalHardcoreSwitch").checked;
+
     loadDatabase();
 
     for (let row of hiraganaRows) {
         let qBox = row.querySelector(".hiragana-box");
         let aSelect = row.querySelector(".row-answer-select");
-        let hSwitch = row.querySelector(".hardcore-switch");
 
         let question = qBox ? qBox.value.trim() : "";
         let correctKanji = aSelect ? aSelect.value : "";
-        let isHardcore = hSwitch ? hSwitch.checked : false;
 
         if (question !== "" || correctKanji !== "") {
             if (!isHiragana(question)) {
@@ -173,28 +174,24 @@ function addQuizSet() {
     localStorage.setItem("myBoxKanjiDB", JSON.stringify(window.quizDatabase));
     alert("မေးခွန်းအသစ် " + newSetsCount + " ပုဒ် အောင်မြင်စွာ သိမ်းဆည်းပြီးပါပြီ! 🎉");
 
+    // Reset Form Inputs
     for (let box of kanjiBoxes) box.value = "";
+    document.getElementById("globalHardcoreSwitch").checked = false; // Switch ကို ပြန်ပိတ်မည်
     
     let hContainer = document.getElementById("hiraganaInputsContainer");
     hContainer.innerHTML = `
         <div class="hiragana-input-row" style="display: flex; gap: 8px; margin-bottom: 10px; align-items: center; flex-wrap: wrap; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;">
-            <input type="text" class="hiragana-box" placeholder="Hiragana မေးခွန်း (ဥပမာ: でんしゃ)" style="flex: 2; min-width: 130px; padding: 9px; font-size: 15px; border: 1px solid #cbd5e1; border-radius: 6px;" required>
-            <select class="row-answer-select" style="flex: 1; min-width: 90px; padding: 9px; font-size: 15px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; font-weight: bold; color: #2563eb;">
+            <input type="text" class="hiragana-box" placeholder="Hiragana မေးခွန်း (ဥပမာ: でんしゃ)" style="flex: 2; min-width: 150px; padding: 9px; font-size: 15px; border: 1px solid #cbd5e1; border-radius: 6px;" required>
+            <select class="row-answer-select" style="flex: 1; min-width: 100px; padding: 9px; font-size: 15px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; font-weight: bold; color: #2563eb;">
                 <option value="">အဖြေမှန်ရွေးပါ</option>
             </select>
-            <div class="switch-container">
-                <span>Hardcore</span>
-                <label class="switch">
-                    <input type="checkbox" class="hardcore-switch">
-                    <span class="slider"></span>
-                </label>
-            </div>
             <button type="button" class="remove-kanji-btn" onclick="this.parentElement.remove()">✕</button>
         </div>
     `;
     updateAllRowAnswerDropdowns();
     renderDashboard();
 }
+
 
 function deleteQuizItem(index) {
     if (confirm("ဤမေးခွန်းကို ဖျက်ရန် သေချာပါသလား?")) {

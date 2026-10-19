@@ -62,31 +62,35 @@
                 <button type="button" class="add-kanji-field-btn" onclick="addKanjiInputBox()">+ Add Kanji (ကွက်လပ်ထပ်ထည့်ရန်)</button>
             </div>
 
-            <!-- 🤹 Hiragana မေးခွန်းများနှင့် Hardcore Switch ပါဝင်သော Container -->
+                     <!-- 🤹 Hiragana မေးခွန်းများ (ခေါင်းစဉ်ဘေးတွင် Hardcore Switch ပါမည်) -->
             <div class="form-group">
-                <label>Hiragana မေးခွန်းများ နှင့် Hardcore Switch:</label>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <label style="margin-bottom: 0;">Hiragana မေးခွန်းများ (ဥပမာ: でんしゃ):</label>
+                    
+                    <!-- ခေါင်းစဉ်ဘေးမှ Hardcore Switch -->
+                    <div class="switch-container">
+                        <span>Hardcore Mode</span>
+                        <label class="switch">
+                            <input type="checkbox" id="globalHardcoreSwitch">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
                 <div id="hiraganaInputsContainer">
                     <div class="hiragana-input-row" style="display: flex; gap: 8px; margin-bottom: 10px; align-items: center; flex-wrap: wrap; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;">
-                        <input type="text" class="hiragana-box" placeholder="Hiragana မေးခွန်း (ဥပမာ: でんしゃ)" style="flex: 2; min-width: 130px; padding: 9px; font-size: 15px; border: 1px solid #cbd5e1; border-radius: 6px;" required>
+                        <input type="text" class="hiragana-box" placeholder="Hiragana မေးခွန်းထည့်ရန်" style="flex: 2; min-width: 150px; padding: 9px; font-size: 15px; border: 1px solid #cbd5e1; border-radius: 6px;" required>
                         
-                        <select class="row-answer-select" style="flex: 1; min-width: 90px; padding: 9px; font-size: 15px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; font-weight: bold; color: #2563eb;">
+                        <select class="row-answer-select" style="flex: 1; min-width: 100px; padding: 9px; font-size: 15px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; font-weight: bold; color: #2563eb;">
                             <option value="">အဖြေမှန်ရွေးပါ</option>
                         </select>
-
-                        <!-- Hardcore Switch Option -->
-                        <div class="switch-container">
-                            <span>Hardcore</span>
-                            <label class="switch">
-                                <input type="checkbox" class="hardcore-switch">
-                                <span class="slider"></span>
-                            </label>
-                        </div>
 
                         <button type="button" class="remove-kanji-btn" onclick="this.parentElement.remove()">✕</button>
                     </div>
                 </div>
                 <button type="button" class="add-kanji-field-btn" onclick="addHiraganaInputBox()">+ Add Hiragana Question (မေးခွန်းကွက်လပ်ထပ်ထည့်ရန်)</button>
             </div>
+
 
             <div class="btn-group">
                 <button class="btn-primary" onclick="addQuizSet()">+ သိမ်းဆည်းမည်</button>
