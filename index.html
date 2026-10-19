@@ -62,10 +62,15 @@
                 <button type="button" class="add-kanji-field-btn" onclick="addKanjiInputBox()">+ Add Kanji (ကွက်လပ်ထပ်ထည့်ရန်)</button>
             </div>
 
-            <!-- Hiragana သီးသန့် မေးခွန်း Input -->
+            <!-- 🤹 Hiragana မေးခွန်းများကို ၁၀ ခုအထိ ထပ်ထည့်နိုင်ရန် Dynamic Container -->
             <div class="form-group">
-                <label>Hiragana မေးခွန်း (ဥပမာ: でんしゃ):</label>
-                <input type="text" id="questionInput" placeholder="ဥပမာ: でんしゃ">
+                <label>Hiragana မေးခွန်းများ (ဥပမာ: でんしゃ):</label>
+                <div id="hiraganaInputsContainer">
+                    <div class="hiragana-input-row" style="display: flex; gap: 8px; margin-bottom: 8px; align-items: center;">
+                        <input type="text" class="hiragana-box" placeholder="ဥပမာ: でんしゃ" style="flex: 1; padding: 10px; font-size: 16px; border: 1px solid #cbd5e1; border-radius: 8px;">
+                    </div>
+                </div>
+                <button type="button" class="add-kanji-field-btn" onclick="addHiraganaInputBox()">+ Add Hiragana Question (မေးခွန်းကွက်လပ်ထပ်ထည့်ရန်)</button>
             </div>
 
             <!-- အဖြေမှန်ကို Click နှိပ်၍ ရွေးချယ်ရန် Container -->

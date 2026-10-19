@@ -34,7 +34,7 @@ function addKanjiInputBox() {
     let currentRows = container.getElementsByClassName("kanji-input-row").length;
     
     if (currentRows >= 10) {
-        alert("အများဆုံး ၁ ခုလျှင် ၁၀ ကွက်အထိသာ ထည့်သွင်းနိုင်ပါသည်။");
+        alert("Kanji ကွက်လပ် အများဆုံး ၁၀ ခုအထိသာ ထည့်သွင်းနိုင်ပါသည်။");
         return;
     }
 
@@ -46,6 +46,26 @@ function addKanjiInputBox() {
     `;
     container.appendChild(rowDiv);
     updateAnswerSelectionButtons();
+}
+
+// 🤹 Hiragana မေးခွန်းကွက်လပ် အသစ်ထပ်ထည့်ရန် (အများဆုံး ၁၀ ခုအထိ)
+function addHiraganaInputBox() {
+    let container = document.getElementById("hiraganaInputsContainer");
+    let currentRows = container.getElementsByClassName("hiragana-input-row").length;
+    
+    if (currentRows >= 10) {
+        alert("Hiragana မေးခွန်းကွက်လပ် အများဆုံး ၁၀ ခုအထိသာ ထည့်သွင်းနိုင်ပါသည်။");
+        return;
+    }
+
+    let rowDiv = document.createElement("div");
+    rowDiv.className = "hiragana-input-row";
+    rowDiv.style.cssText = "display: flex; gap: 8px; margin-bottom: 8px; align-items: center;";
+    rowDiv.innerHTML = `
+        <input type="text" class="hiragana-box" placeholder="Hiragana မေးခွန်းထည့်ရန်" style="flex: 1; padding: 10px; font-size: 16px; border: 1px solid #cbd5e1; border-radius: 8px;">
+        <button type="button" class="remove-kanji-btn" onclick="this.parentElement.remove()">✕</button>
+    `;
+    container.appendChild(rowDiv);
 }
 
 function updateAnswerSelectionButtons() {
@@ -110,6 +130,7 @@ function isHiragana(str) {
     return /^[\u3040-\u309F\sー]+$/.test(str);
 }
 
+// မေးခွန်းအသစ် သိမ်းဆည်းခြင်း (Hiragana မျိုးစုံကို တပြိုင်နက် သိမ်းဆည်းပေးမည်)
 function addQuizSet() {
     let kanjiBoxes = document.getElementsByClassName("kanji-box");
     let kanjis = [];
@@ -118,19 +139,27 @@ function addQuizSet() {
         if (val !== "") kanjis.push(val);
     }
 
-    let question = document.getElementById("questionInput").value.trim();
+    let hiraganaBoxes = document.getElementsByClassName("hiragana-box");
+    let questions = [];
+    for (let box of hiraganaBoxes) {
+        let val = box.value.trim();
+        if (val !== "") {
+            if (!isHiragana(val)) {
+                alert("မေးခွန်းများထဲတွင် Hiragana မဟုတ်သော စာလုံးများ ပါဝင်နေပါသည်။ (ဥပမာ: でんしゃ)");
+                return;
+            }
+            questions.push(val);
+        }
+    }
+
     let correctKanji = document.getElementById("selectedAnswerInput").value.trim();
 
     if (kanjis.length < 2) {
         alert("ကျေးဇူးပြု၍ Kanji ကွက်လပ် အနည်းဆုံး ၂ ခု ဖြည့်ပါ။");
         return;
     }
-    if (!question) {
-        alert("Hiragana မေးခွန်းကို ထည့်သွင်းပါ။");
-        return;
-    }
-    if (!isHiragana(question)) {
-        alert("မေးခွန်းသည် Hiragana သက်သက် ဖြစ်ရပါမည် (ဥပမာ: でんしゃ)။");
+    if (questions.length === 0) {
+        alert("ကျေးဇူးပြု၍ Hiragana မေးခွန်း အနည်းဆုံး ၁ ခု ထည့်သွင်းပါ။");
         return;
     }
     if (!correctKanji || !kanjis.includes(correctKanji)) {
@@ -139,13 +168,27 @@ function addQuizSet() {
     }
 
     loadDatabase();
-    window.quizDatabase.push({ kanjis, question, correctKanji });
+
+    // ထည့်သွင်းထားသော Hiragana တစ်ခုချင်းစီအတွက် Quiz Set တစ်ခုစီ Database ထဲသို့ ထည့်မည်
+    questions.forEach(question => {
+        window.quizDatabase.push({ kanjis: [...kanjis], question, correctKanji });
+    });
+
     localStorage.setItem("myBoxKanjiDB", JSON.stringify(window.quizDatabase));
 
-    alert("မေးခွန်းအသစ် သိမ်းဆည်းပြီးပါပြီ! 🎉");
+    alert("မေးခွန်းအသစ်များ အောင်မြင်စွာ သိမ်းဆည်းပြီးပါပြီ! 🎉");
 
+    // Clear Inputs
     for (let box of kanjiBoxes) box.value = "";
-    document.getElementById("questionInput").value = "";
+    
+    // Reset Hiragana boxes to single empty field
+    let hContainer = document.getElementById("hiraganaInputsContainer");
+    hContainer.innerHTML = `
+        <div class="hiragana-input-row" style="display: flex; gap: 8px; margin-bottom: 8px; align-items: center;">
+            <input type="text" class="hiragana-box" placeholder="ဥပမာ: でんしゃ" style="flex: 1; padding: 10px; font-size: 16px; border: 1px solid #cbd5e1; border-radius: 8px;">
+        </div>
+    `;
+
     document.getElementById("selectedAnswerInput").value = "";
     updateAnswerSelectionButtons();
 
