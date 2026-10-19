@@ -8,16 +8,19 @@
 </head>
 <body>
 
-    <!-- Header with Floating Menu Selection -->
-    <header class="app-header">
-        <div class="app-title">🏮 Kanji Card Quiz App</div>
-        <div class="app-subtitle">Interactive Offline Kanji Learning Platform</div>
+    <!-- App Title -->
+    <div class="app-title-box">
+        <h1>🏮 Kanji Card Quiz App</h1>
+        <p>Interactive Kanji Learning & Management System</p>
+    </div>
 
-        <div class="menu-container">
+    <!-- 🎛️ Clean Floating Menu Selection (ဘားတန်း မဟုတ်ပါ) -->
+    <div class="menu-wrapper">
+        <div class="menu-pills">
             <button id="quizModeBtn" class="menu-btn active" onclick="switchPage('quiz')">🎮 Quiz Mode</button>
             <button id="dashboardBtn" class="menu-btn" onclick="switchPage('dashboard')">⚙️ Dashboard</button>
         </div>
-    </header>
+    </div>
 
     <!-- 🎮 PAGE 1: Quiz Mode View -->
     <main id="quizPage" class="page-view active">
@@ -76,7 +79,7 @@
         <div class="item-list" id="dashboardList"></div>
     </main>
 
-    <!-- Scripts (အစဉ်လိုက် သန့်သန့်ရှင်းရှင်း ချိတ်ဆက်ထားပါသည်) -->
+    <!-- Scripts -->
     <script src="kanji.js"></script>
     <script src="quiz.js"></script>
     <script src="ans.js"></script>
