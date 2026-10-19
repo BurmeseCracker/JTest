@@ -3,135 +3,145 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kanji Card Quiz & Dashboard</title>
+    <title>Kanji Quiz - Admin Panel</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- Tab Navigation Buttons -->
-    <div class="nav-tabs">
-        <button class="tab-btn active" onclick="switchTab('quiz')">🎮 Quiz ကစားရန်</button>
-        <button class="tab-btn" onclick="switchTab('dashboard')">⚙️ Dashboard (အချက်အလက်ထည့်ရန်)</button>
-    </div>
-
-    <!-- TAB 1: Quiz Playing Screen -->
-    <div id="quizTab" class="tab-content active">
-        <div id="timer">အချိန်: 5 စက္ကန့်</div>
-        <div class="cards-container" id="cardsContainer"></div>
-        <div class="question-wrapper">
-            <div id="questionBox">မေးခွန်းပေါ်မည်</div>
+    <!-- 🔵 Professional Blue Navigation Bar -->
+    <nav class="navbar">
+        <div class="brand">
+            <span>🏮</span> Kanji App Manager
         </div>
-        <div id="result"></div>
-        <div>
+        <div class="nav-links">
+            <button class="nav-item active" onclick="switchPage('quiz')">🎮 Quiz Page</button>
+            <button class="nav-item" onclick="switchPage('dashboard')">⚙️ Admin Dashboard</button>
+        </div>
+    </nav>
+
+    <!-- 🎮 PAGE 1: Quiz Playing Page -->
+    <main id="quizPage" class="page-view active">
+        <div class="quiz-card-wrapper">
+            <div id="timer">အချိန်: 5 စက္ကန့်</div>
+            
+            <div class="cards-container" id="cardsContainer"></div>
+
+            <div class="question-wrapper">
+                <div id="questionBox">မေးခွန်းပေါ်မည်</div>
+            </div>
+
+            <div id="result"></div>
             <button id="nextBtn" onclick="nextQuiz()">နောက်တစ်ပုဒ်သို့ (Next)</button>
         </div>
-    </div>
+    </main>
 
-    <!-- TAB 2: Dashboard Management Screen -->
-    <div id="dashboardTab" class="tab-content">
-        <h2>⚙️ Kanji Data Dashboard</h2>
+    <!-- ⚙️ PAGE 2: Admin Dashboard Panel -->
+    <main id="dashboardPage" class="page-view">
+        <h2 style="margin-bottom: 20px; text-align: left; color: #1e293b;">⚙️ Kanji Set Management</h2>
         
-        <div class="dashboard-card">
-            <h3>မေးခွန်းအသစ် ထည့်သွင်းရန်</h3>
+        <div class="admin-card">
+            <h3>+ မေးခွန်း / Kanji အချက်အလက်သစ် ထည့်သွင်းရန်</h3>
             <div class="form-group">
                 <label>Kanji စာလုံးများ (ကော်မာ , ခြား၍ ရေးပါ):</label>
                 <input type="text" id="kanjiInput" placeholder="ဥပမာ: 車, 電車, 駅">
             </div>
             <div class="form-group">
-                <label>Hiragana မေးခွန်း:</label>
+                <label>Hiragana မေးခွန်း / အဓိပ္ပာယ်:</label>
                 <input type="text" id="questionInput" placeholder="ဥပမာ: でんしゃ (densha) - လျှပ်စစ်ရထား">
             </div>
             <div class="form-group">
                 <label>အဖြေမှန် Kanji:</label>
                 <input type="text" id="answerInput" placeholder="ဥပမာ: 電車">
             </div>
-            <button class="action-btn" onclick="addQuizSet()">+ အသစ်သိမ်းမည် (Save)</button>
-            <button class="action-btn" style="background: #757575;" onclick="resetDefaultData()">Default မူလဒေတာ ပြန်ယူမည်</button>
+            <div class="btn-group">
+                <button class="btn-primary" onclick="addQuizSet()">+ သိမ်းဆည်းမည်</button>
+                <button class="btn-secondary" onclick="clearAllData()">အချက်အလက်အားလုံး ဖျက်မည်</button>
+            </div>
         </div>
 
-        <h3>ရှိပြီးသား မေးခွန်းများ စာရင်း</h3>
+        <h3 style="margin-bottom: 15px; text-align: left; color: #1e293b;">📋 လက်ရှိ မေးခွန်းစာရင်း</h3>
         <div class="item-list" id="dashboardList"></div>
-    </div>
+    </main>
+
+    <!-- JS ဖိုင် ၃ ခုကို အချိတ်အဆက်မပျက်အောင် ထည့်ထားသော်လည်း အလွတ်ထားပါမည် -->
+    <script src="kanji.js"></script>
+    <script src="quiz.js"></script>
+    <script src="ans.js"></script>
 
     <script>
-        // မူလ စတင်ချိန်တွင် ပါရှိမည့် Default စာရင်း
-        const defaultQuizData = [
-            { kanjis: ["日", "月", "火"], question: "ひ (hi) - နေ", correctKanji: "日" },
-            { kanjis: ["水", "木", "金"], question: "き (ki) - သစ်ပင်", correctKanji: "木" },
-            { kanjis: ["山", "川", "田"], question: "やま (yama) - တောင်", correctKanji: "山" },
-            { kanjis: ["車", "電車", "駅"], question: "でんしゃ (densha) - လျှပ်စစ်ရထား", correctKanji: "電車" }
-        ];
-
         let quizDatabase = [];
 
-        // LocalStorage မှ ဒေတာဖတ်ယူခြင်း
+        // LocalStorage မှ အချက်အလက်များကိုသာ ဖတ်ယူမည်
         function loadDatabase() {
-            let localData = localStorage.getItem("myKanjiAppDB");
+            let localData = localStorage.getItem("myAdminQuizDB");
             if (localData) {
                 quizDatabase = JSON.parse(localData);
             } else {
-                quizDatabase = [...defaultQuizData];
-                localStorage.setItem("myKanjiAppDB", JSON.stringify(quizDatabase));
+                quizDatabase = [];
             }
         }
 
-        // Tab ပြောင်းလဲခြင်း
-        function switchTab(tabName) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        // Page Switcher
+        function switchPage(pageName) {
+            document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.page-view').forEach(page => page.classList.remove('active'));
 
-            if (tabName === 'quiz') {
-                document.querySelectorAll('.tab-btn')[0].classList.add('active');
-                document.getElementById('quizTab').classList.add('active');
+            if (pageName === 'quiz') {
+                document.querySelectorAll('.nav-item')[0].classList.add('active');
+                document.getElementById('quizPage').classList.add('active');
                 loadQuiz();
             } else {
-                document.querySelectorAll('.tab-btn')[1].classList.add('active');
-                document.getElementById('dashboardTab').classList.add('active');
+                document.querySelectorAll('.nav-item')[1].classList.add('active');
+                document.getElementById('dashboardPage').classList.add('active');
                 renderDashboard();
             }
         }
 
-        // Dashboard ထဲတွင် စာရင်းများ ပြသခြင်း
+        // Render Dashboard Items
         function renderDashboard() {
             let listContainer = document.getElementById("dashboardList");
             listContainer.innerHTML = "";
+
+            if (quizDatabase.length === 0) {
+                listContainer.innerHTML = "<p style='color:#64748b; text-align:left;'>မေးခွန်းများ မရှိသေးပါ။ အပေါ်တွင် မေးခွန်းအသစ် ထည့်ပါ၊</p>";
+                return;
+            }
 
             quizDatabase.forEach((item, index) => {
                 let div = document.createElement("div");
                 div.className = "list-item";
                 div.innerHTML = `
-                    <div>
+                    <div class="list-item-info">
                         <strong>မေးခွန်း:</strong> ${item.question}<br>
-                        <strong>Kanjis:</strong> ${item.kanjis.join(", ")} | 
-                        <strong>အဖြေမှန်:</strong> <span style="color:green; font-weight:bold;">${item.correctKanji}</span>
+                        <strong>Kanji စာလုံးများ:</strong> ${item.kanjis.join(", ")} | 
+                        <strong>အဖြေမှန်:</strong> <span style="color:#22c55e; font-weight:bold;">${item.correctKanji}</span>
                     </div>
-                    <button class="delete-btn" onclick="deleteQuizSet(${index})">ဖျက်မည်</button>
+                    <button class="btn-danger" onclick="deleteQuizSet(${index})">ဖျက်မည်</button>
                 `;
                 listContainer.appendChild(div);
             });
         }
 
-        // မေးခွန်းအသစ် ထည့်သွင်းခြင်း
+        // Add New Quiz Set
         function addQuizSet() {
             let kInput = document.getElementById("kanjiInput").value.trim();
             let qInput = document.getElementById("questionInput").value.trim();
             let aInput = document.getElementById("answerInput").value.trim();
 
             if (!kInput || !qInput || !aInput) {
-                alert("ကျေးဇူးပြု၍ အကွက်အားလုံး ဖြည့်သွင်းပါ!");
+                alert("ကျေးဇူးပြု၍ အကွက်အားလုံး ဖြည့်ပါ!");
                 return;
             }
 
             let kanjiArray = kInput.split(",").map(s => s.trim());
-            
             quizDatabase.push({
                 kanjis: kanjiArray,
                 question: qInput,
                 correctKanji: aInput
             });
 
-            localStorage.setItem("myKanjiAppDB", JSON.stringify(quizDatabase));
-            alert("အချက်အလက်သစ် သိမ်းဆည်းပြီးပါပြီ! 🎉");
+            localStorage.setItem("myAdminQuizDB", JSON.stringify(quizDatabase));
+            alert("အချက်အလက်သစ် သိမ်းပြီးပါပြီ! 🎉");
 
             document.getElementById("kanjiInput").value = "";
             document.getElementById("questionInput").value = "";
@@ -140,25 +150,25 @@
             renderDashboard();
         }
 
-        // မေးခွန်း ဖျက်ခြင်း
+        // Delete Single Set
         function deleteQuizSet(index) {
             if (confirm("ဒီမေးခွန်းကို ဖျက်ရန် သေချာပါသလား?")) {
                 quizDatabase.splice(index, 1);
-                localStorage.setItem("myKanjiAppDB", JSON.stringify(quizDatabase));
+                localStorage.setItem("myAdminQuizDB", JSON.stringify(quizDatabase));
                 renderDashboard();
             }
         }
 
-        // Default ပြန်ယူခြင်း
-        function resetDefaultData() {
-            if (confirm("မူလ မေးခွန်းများအတိုင်း ပြန်လည် ထားရှိမှာ သေချာပါသလား?")) {
-                quizDatabase = [...defaultQuizData];
-                localStorage.setItem("myKanjiAppDB", JSON.stringify(quizDatabase));
+        // Clear All Data
+        function clearAllData() {
+            if (confirm("မေးခွန်း အချက်အလက် အားလုံးကို ဖျက်ပစ်မှာ သေချာပါသလား?")) {
+                localStorage.removeItem("myAdminQuizDB");
+                loadDatabase();
                 renderDashboard();
             }
         }
 
-        // Quiz Logic
+        // Quiz Mechanics
         let currentIndex = 0;
         let timeLeft = 5;
         let timerInterval;
@@ -177,8 +187,9 @@
         function loadQuiz() {
             loadDatabase();
             if (quizDatabase.length === 0) {
-                document.getElementById("questionBox").innerText = "မေးခွန်းများ မရှိသေးပါ၊ Dashboard တွင် ထည့်ပါ။";
+                document.getElementById("questionBox").innerText = "မေးခွန်းများ မရှိသေးပါ။ Dashboard တက်ပြီး မေးခွန်းဖြည့်ပါ။";
                 document.getElementById("cardsContainer").innerHTML = "";
+                document.getElementById("timer").innerText = "အချိန်: -";
                 return;
             }
 
@@ -238,11 +249,11 @@
             }
 
             if (selectedKanji === correctKanji) {
-                document.getElementById("result").style.color = "#4CAF50";
+                document.getElementById("result").style.color = "#22c55e";
                 document.getElementById("result").innerText = "မှန်ကန်ပါတယ်! 🎉";
             } else {
                 cards[clickedIndex].classList.add("wrong");
-                document.getElementById("result").style.color = "#F44336";
+                document.getElementById("result").style.color = "#ef4444";
                 document.getElementById("result").innerText = "အဖြေမှားယွင်းနေပါတယ် ❌";
             }
 
@@ -260,7 +271,7 @@
             }
 
             document.getElementById("timer").innerText = "အချိန်ကုန်သွားပါပြီ ⌛";
-            document.getElementById("result").style.color = "#F44336";
+            document.getElementById("result").style.color = "#ef4444";
             document.getElementById("result").innerText = "အချိန်ကုန်သွားပါပြီ ❌";
             
             document.getElementById("nextBtn").style.display = "inline-block";
@@ -271,7 +282,6 @@
             loadQuiz();
         }
 
-        // စတင်ချိန်တွင် ဒေတာဖတ်ပြီး Quiz စတင်မည်
         loadDatabase();
         loadQuiz();
     </script>
