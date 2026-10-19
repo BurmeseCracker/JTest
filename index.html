@@ -123,14 +123,14 @@
     <script>
         let quizDatabase = [];
 
-        // kanjiLists, questionLists နဲ့ answerLists များကို ပေါင်းစပ်ခြင်း
+        // kanjiLists, questionLists နဲ့ answerLists (Kanji စာလုံးတိုက်ရိုက်) များကို ပေါင်းစပ်ခြင်း
         if (typeof kanjiLists !== 'undefined' && typeof questionLists !== 'undefined' && typeof answerLists !== 'undefined') {
             for (let i = 0; i < kanjiLists.length; i++) {
                 if (kanjiLists[i] && questionLists[i]) {
                     quizDatabase.push({
                         kanjis: kanjiLists[i],
                         question: questionLists[i],
-                        correctIndex: answerLists[i] !== undefined ? answerLists[i] : 0
+                        correctKanji: answerLists[i] !== undefined ? answerLists[i] : kanjiLists[i][0]
                     });
                 }
             }
@@ -167,7 +167,8 @@
             document.getElementById("result").innerText = "";
             document.getElementById("nextBtn").style.display = "none";
 
-            currentCorrectOriginalKanji = current.kanjis[current.correctIndex];
+            // ans.js ထဲက သတ်မှတ်ထားသော အဖြေမှန် Kanji စာလုံးကို တိုက်ရိုက်ယူခြင်း
+            currentCorrectOriginalKanji = current.correctKanji;
             let randomizedKanjis = shuffleArray(current.kanjis);
 
             let cardsContainer = document.getElementById("cardsContainer");
