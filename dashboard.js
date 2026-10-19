@@ -170,7 +170,7 @@ function clearAllData() {
     }
 }
 
-// --- BACKUP MODAL LOGIC ---
+// --- BACKUP & IMPORT LOGIC ---
 function openBackupModal() {
     document.getElementById("backupModal").classList.add("show");
 }
@@ -226,4 +226,32 @@ function backupToDownloadsFolder() {
     downloadAnchor.remove();
     
     alert("Downloads Folder သို့ '" + fileName + "' အဖြစ် အောင်မြင်စွာ သိမ်းဆည်းပြီးပါပြီ! 📥");
+}
+
+function importBackupFile(event) {
+    let file = event.target.files[0];
+    if (!file) return;
+
+    let reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            let importedData = JSON.parse(e.target.result);
+            if (Array.isArray(importedData)) {
+                if (confirm("မေးခွန်းဒေတာ " + importedData.length + " ပုဒ်ကို တင်သွင်းရန် သေချာပါသလား? (လက်ရှိ ဒေတာများနှင့် ပေါင်းထည့်မည်)")) {
+                    loadDatabase();
+                    window.quizDatabase = window.quizDatabase.concat(importedData);
+                    localStorage.setItem("myBoxKanjiDB", JSON.stringify(window.quizDatabase));
+                    renderDashboard();
+                    alert("Backup ဖိုင်ကို အောင်မြင်စွာ ပြန်လည်တင်သွင်းပြီးပါပြီ! 🎉");
+                }
+            } else {
+                alert("ဖိုင် ပုံစံ မှားယွင်းနေပါသည်။ (JSON Format မမှန်ပါ)");
+            }
+        } catch (err) {
+            console.error(err);
+            alert("JSON ဖိုင်ကို ဖတ်ရှုရာတွင် အမှားအယွင်း ရှိခဲ့ပါသည်။");
+        }
+        event.target.value = "";
+    };
+    reader.readAsText(file);
 }

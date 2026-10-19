@@ -80,6 +80,8 @@
             <div class="btn-group">
                 <button class="btn-primary" onclick="addQuizSet()">+ သိမ်းဆည်းမည်</button>
                 <button class="btn-primary" style="background: #0ea5e9;" onclick="openBackupModal()">💾 Backup သိမ်းဆည်းရန်</button>
+                <button class="btn-primary" style="background: #10b981;" onclick="document.getElementById('importFileBox').click()">📂 Backup ပြန်တင်ရန် (Import)</button>
+                <input type="file" id="importFileBox" accept=".json" style="display: none;" onchange="importBackupFile(event)">
                 <button class="btn-danger" onclick="clearAllData()">အချက်အလက်အားလုံး ဖျက်မည်</button>
             </div>
         </div>
@@ -106,7 +108,7 @@
         </div>
     </div>
 
-    <!-- 🎮 Quiz Ready Start Modal Popup -->
+    <!-- 🎮 Quiz Ready Start Modal Popup (Shown once per session) -->
     <div id="quizStartModal" class="backup-modal-overlay">
         <div class="backup-modal-card" style="text-align: center;">
             <h3 style="font-size: 20px; margin-bottom: 12px;">🎮 Kanji Quiz ကို စတင်ရန် အသင့်ဖြစ်ပြီလား။</h3>
@@ -120,6 +122,19 @@
                     မဆော့သေးဘူး (Cancel)
                 </button>
             </div>
+        </div>
+    </div>
+
+    <!-- 📊 Quiz Finish Results Modal Popup -->
+    <div id="quizResultsModal" class="backup-modal-overlay">
+        <div class="backup-modal-card" style="text-align: center;">
+            <h3 style="font-size: 22px; margin-bottom: 15px; color: #2563eb;">🏆 Quiz ပြီးဆုံးပါပြီ!</h3>
+            <div id="quizScoreText" style="font-size: 18px; font-weight: bold; margin-bottom: 25px; color: #1e293b;">
+                မှန်ကန်မှု ရလဒ်: 0 / 0
+            </div>
+            <button class="backup-option-btn" style="background: #2563eb; color: white; text-align: center; border: none;" onclick="closeResultsModal()">
+                Dashboard သို့ ပြန်မည်
+            </button>
         </div>
     </div>
 

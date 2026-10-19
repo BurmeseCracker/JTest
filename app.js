@@ -5,6 +5,11 @@ let timerInterval = null;
 let isAnswered = false;
 let currentCorrectOriginalKanji = "";
 
+// Score Tracking & Session Flags
+let scoreCorrect = 0;
+let scoreTotal = 0;
+let hasShownStartModalThisSession = false;
+
 function loadDatabase() {
     let localData = localStorage.getItem("myBoxKanjiDB");
     if (localData) {
@@ -63,7 +68,6 @@ function shuffleArray(array) {
     return shuffled;
 }
 
-// Quiz Page သို့ ရောက်လျှင် Ready Pop-up ကို အရင်ပြမည်
 function loadQuiz() {
     loadDatabase();
     let qBox = document.getElementById("questionBox");
@@ -77,13 +81,31 @@ function loadQuiz() {
         return;
     }
 
-    document.getElementById("quizStartModal").classList.add("show");
+    // Reset session score tracking
+    currentIndex = 0;
+    scoreCorrect = 0;
+    scoreTotal = window.quizDatabase.length;
+
+    // Show Ready modal only once per session
+    if (!hasShownStartModalThisSession) {
+        document.getElementById("quizStartModal").classList.add("show");
+    } else {
+        startQuizRun();
+    }
 }
 
-// "စတင်မည်" နှိပ်မှ Quiz စတင်မည်
 function startQuizAction() {
+    hasShownStartModalThisSession = true;
     document.getElementById("quizStartModal").classList.remove("show");
+    startQuizRun();
+}
 
+function cancelQuizAction() {
+    document.getElementById("quizStartModal").classList.remove("show");
+    switchPage('dashboard');
+}
+
+function startQuizRun() {
     clearInterval(timerInterval);
     timeLeft = 5;
     isAnswered = false;
@@ -118,12 +140,6 @@ function startQuizAction() {
     startTimer();
 }
 
-// "မဆော့သေးဘူး" နှိပ်လျှင် Dashboard သို့ ပြန်သွားမည်
-function cancelQuizAction() {
-    document.getElementById("quizStartModal").classList.remove("show");
-    switchPage('dashboard');
-}
-
 function startTimer() {
     timerInterval = setInterval(() => {
         timeLeft--;
@@ -153,6 +169,7 @@ function selectCard(selectedKanji, correctKanji, clickedIndex) {
 
     let resultBox = document.getElementById("result");
     if (selectedKanji === correctKanji) {
+        scoreCorrect++;
         resultBox.style.color = "#22c55e";
         resultBox.innerText = "မှန်ကန်ပါတယ်! 🎉";
     } else {
@@ -183,8 +200,24 @@ function timeOutAction() {
 }
 
 function nextQuiz() {
-    currentIndex = (currentIndex + 1) % window.quizDatabase.length;
-    loadQuiz();
+    currentIndex++;
+    if (currentIndex < window.quizDatabase.length) {
+        startQuizRun();
+    } else {
+        showResultsModal();
+    }
+}
+
+function showResultsModal() {
+    let scoreText = document.getElementById("quizScoreText");
+    scoreText.innerText = `မှန်ကန်မှု ရလဒ်: ${scoreCorrect} / ${scoreTotal} ပုဒ်`;
+    document.getElementById("quizResultsModal").classList.add("show");
+}
+
+function closeResultsModal() {
+    document.getElementById("quizResultsModal").classList.remove("show");
+    hasShownStartModalThisSession = false; // Reset to show start modal on next quiz session
+    switchPage('dashboard');
 }
 
 window.onload = function() {
