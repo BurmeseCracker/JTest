@@ -183,17 +183,18 @@ function addQuizSet() {
         return;
     }
 
-    // မေးခွန်းသိမ်းဆည်းခြင်း (Hardcore ဖြစ်ပါက questions/answers များ အများကြီးပါဝင်မည်)
+    // 💡 အဓိက ပြင်ဆင်ချက် - Hardcore ဖြစ်စေ၊ Normal ဖြစ်စေ မေးခွန်းအုပ်စု တစ်ခုတည်း (Single Object) အဖြစ်သာ သိမ်းမည်
     window.quizDatabase.push({
         kanjis: [...kanjis],
-        question: isHardcore ? questionsList : questionsList[0],
-        correctKanji: isHardcore ? answersMap : answersMap[questionsList[0]],
+        question: questionsList, // Hiragana အားလုံးကို Array အဖြစ် သိမ်းမည်
+        correctKanji: answersMap, // Hiragana တစ်ခုချင်းစီအတွက် အဖြေမှန်များ တွဲသိမ်းမည်
         isHardcore: isHardcore
     });
 
     localStorage.setItem("myBoxKanjiDB", JSON.stringify(window.quizDatabase));
     alert("မေးခွန်းအသစ် အောင်မြင်စွာ သိမ်းဆည်းပြီးပါပြီ! 🎉");
 
+    // Form ကို ရှင်းလင်းမည်
     for (let box of kanjiBoxes) box.value = "";
     document.getElementById("globalHardcoreSwitch").checked = false;
     
