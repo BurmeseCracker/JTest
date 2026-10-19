@@ -1,17 +1,15 @@
 window.quizDatabase = [];
 let currentIndex = 0;
-let timeLeft = 30;
+let timeLeft = 45;
 let timerInterval = null;
 let isAnswered = false;
 
-// Quiz Session & Mode State
 let currentQuizMode = 'easy'; 
 let scoreCorrect = 0;
 let scoreTotal = 0;
 let hasShownStartModalThisSession = false;
 
-// Hardcore Active Match State variables
-let selectedHiraganaItem = null;
+let selectedKanjiItem = null;
 let matchedPairsCount = 0;
 let hardcoreTotalPairs = 0;
 
@@ -136,7 +134,7 @@ function startQuizRun() {
     document.getElementById("nextBtn").style.display = "none";
 
     if (currentQuizMode === 'easy') {
-        // --- EASY MODE LOGIC ---
+        // --- EASY MODE (ပုံမှန် တစ်ပုဒ်ချင်း) ---
         let current = window.quizDatabase[currentIndex];
         let currentQuestionText = Array.isArray(current.question) ? current.question[0] : current.question;
         let currentCorrectOriginalKanji = typeof current.correctKanji === 'object' ? current.correctKanji[currentQuestionText] : current.correctKanji;
@@ -162,31 +160,36 @@ function startQuizRun() {
         });
 
     } else {
-        // --- HARDCORE MODE (Kanji များ အပေါ်တွင် ရှိမည်၊ Hiragana များ အောက်တွင် ရှိမည်) ---
+        // --- HARDCORE MODE (Kanji များရော Hiragana များပါ အစုံအလင် တစ်ပြိုင်နက်တည်းပေါ်မည်) ---
         let currentSet = window.quizDatabase.filter(item => item.isHardcore)[currentIndex];
         if (!currentSet) {
             showResultsModal();
             return;
         }
 
-        qBox.innerText = "🔥 Hardcore Mode: အောက်ပါ Hiragana များကို နှိပ်ပြီး အပေါ်မှ Kanji များနှင့် တွဲပါ";
+        qBox.innerText = "🔥 Hardcore Mode: Kanji များကိုနှိပ်ပြီး ၎င်းတို့နှင့်ကိုက်ညီသော Hiragana များနှင့် တွဲပါ";
         
-        let hiraganaMap = currentSet.correctKanji; 
+        let hiraganaMap = currentSet.correctKanji; // { "hiragana": "kanji" }
+        // ပြောင်းပြန် map ပြုလုပ်ခြင်း (Kanji -> Hiragana တွဲရန်)
+        let kanjiToHiragana = {};
+        for (let h in hiraganaMap) {
+            kanjiToHiragana[hiraganaMap[h]] = h;
+        }
+
+        let shuffledKanjis = shuffleArray(currentSet.kanjis);
         let hiraganaKeys = Object.keys(hiraganaMap);
         hardcoreTotalPairs = hiraganaKeys.length;
         matchedPairsCount = 0;
-        selectedHiraganaItem = null;
-
-        let shuffledKanjis = shuffleArray(currentSet.kanjis);
+        selectedKanjiItem = null;
 
         cContainer.innerHTML = `
             <div style="width: 100%; display: flex; flex-direction: column; gap: 15px;">
-                <div style="font-size: 13px; font-weight: bold; color: #64748b; text-align: left;">Kanji များ:</div>
+                <div style="font-size: 13px; font-weight: bold; color: #64748b; text-align: left;">Kanji များကို ရွေးပါ:</div>
                 <div id="kanjiMatchContainer" style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;"></div>
                 
                 <hr style="border: 0; border-top: 1px solid #e2e8f0; width: 100%; margin: 5px 0;">
                 
-                <div style="font-size: 13px; font-weight: bold; color: #64748b; text-align: left;">Hiragana များကို နှိပ်ပါ:</div>
+                <div style="font-size: 13px; font-weight: bold; color: #64748b; text-align: left;">Hiragana များကို ရွေးပါ:</div>
                 <div id="hiraganaMatchContainer" style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;"></div>
             </div>
         `;
@@ -194,6 +197,7 @@ function startQuizRun() {
         let kMatchContainer = document.getElementById("kanjiMatchContainer");
         let hMatchContainer = document.getElementById("hiraganaMatchContainer");
 
+        // Kanji ခလုတ်များ ဖန်တီးခြင်း
         shuffledKanjis.forEach(kChar => {
             let kBtn = document.createElement("button");
             kBtn.className = "match-btn kanji-match-btn";
@@ -201,22 +205,39 @@ function startQuizRun() {
             kBtn.style.cssText = "padding: 12px 18px; font-size: 22px; font-weight: bold; background: #fff; border: 2px solid #cbd5e1; border-radius: 8px; cursor: pointer; min-width: 50px;";
             
             kBtn.onclick = () => {
-                if (kBtn.classList.contains('matched') || !selectedHiraganaItem) return;
+                if (kBtn.classList.contains('matched')) return;
+                document.querySelectorAll('.kanji-match-btn').forEach(b => b.style.borderColor = "#cbd5e1");
+                kBtn.style.borderColor = "#2563eb";
+                selectedKanjiItem = { kanji: kChar, element: kBtn, targetHiragana: kanjiToHiragana[kChar] };
+            };
+            kMatchContainer.appendChild(kBtn);
+        });
 
-                if (selectedHiraganaItem.correct === kChar) {
-                    selectedHiraganaItem.element.classList.add('matched');
-                    selectedHiraganaItem.element.style.background = "#dcfce7";
-                    selectedHiraganaItem.element.style.borderColor = "#22c55e";
-                    selectedHiraganaItem.element.style.color = "#166534";
-                    selectedHiraganaItem.element.disabled = true;
+        // Hiragana ခလုတ်များ ဖန်တီးခြင်း
+        shuffleArray(hiraganaKeys).forEach(hKey => {
+            let hBtn = document.createElement("button");
+            hBtn.className = "match-btn hiragana-match-btn";
+            hBtn.innerText = hKey;
+            hBtn.style.cssText = "padding: 10px 16px; font-size: 16px; font-weight: bold; background: #f8fafc; border: 2px solid #cbd5e1; border-radius: 8px; cursor: pointer;";
+            
+            hBtn.onclick = () => {
+                if (hBtn.classList.contains('matched') || !selectedKanjiItem) return;
 
-                    kBtn.classList.add('matched');
-                    kBtn.style.background = "#dcfce7";
-                    kBtn.style.borderColor = "#22c55e";
-                    kBtn.style.color = "#166534";
-                    kBtn.disabled = true;
+                if (selectedKanjiItem.targetHiragana === hKey) {
+                    // မှန်ကန်ပါက
+                    selectedKanjiItem.element.classList.add('matched');
+                    selectedKanjiItem.element.style.background = "#dcfce7";
+                    selectedKanjiItem.element.style.borderColor = "#22c55e";
+                    selectedKanjiItem.element.style.color = "#166534";
+                    selectedKanjiItem.element.disabled = true;
 
-                    selectedHiraganaItem = null;
+                    hBtn.classList.add('matched');
+                    hBtn.style.background = "#dcfce7";
+                    hBtn.style.borderColor = "#22c55e";
+                    hBtn.style.color = "#166534";
+                    hBtn.disabled = true;
+
+                    selectedKanjiItem = null;
                     matchedPairsCount++;
 
                     if (matchedPairsCount === hardcoreTotalPairs) {
@@ -228,28 +249,14 @@ function startQuizRun() {
                         document.getElementById("nextBtn").style.display = "inline-block";
                     }
                 } else {
-                    kBtn.style.background = "#fee2e2";
-                    kBtn.style.borderColor = "#ef4444";
+                    // မှားယွင်းပါက
+                    hBtn.style.background = "#fee2e2";
+                    hBtn.style.borderColor = "#ef4444";
                     setTimeout(() => {
-                        kBtn.style.background = "#fff";
-                        kBtn.style.borderColor = "#cbd5e1";
+                        hBtn.style.background = "#f8fafc";
+                        hBtn.style.borderColor = "#cbd5e1";
                     }, 500);
                 }
-            };
-            kMatchContainer.appendChild(kBtn);
-        });
-
-        shuffleArray(hiraganaKeys).forEach(hKey => {
-            let hBtn = document.createElement("button");
-            hBtn.className = "match-btn hiragana-match-btn";
-            hBtn.innerText = hKey;
-            hBtn.style.cssText = "padding: 10px 16px; font-size: 16px; font-weight: bold; background: #f8fafc; border: 2px solid #cbd5e1; border-radius: 8px; cursor: pointer;";
-            
-            hBtn.onclick = () => {
-                if (hBtn.classList.contains('matched')) return;
-                document.querySelectorAll('.hiragana-match-btn').forEach(b => b.style.borderColor = "#cbd5e1");
-                hBtn.style.borderColor = "#2563eb";
-                selectedHiraganaItem = { key: hKey, element: hBtn, correct: hiraganaMap[hKey] };
             };
             hMatchContainer.appendChild(hBtn);
         });
