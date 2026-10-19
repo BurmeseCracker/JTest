@@ -8,9 +8,8 @@
 </head>
 <body>
 
-    <!-- 🔵 ပုံပါအတိုင်း အပေါ်ဆုံး Header Bar နှင့် Menu Icon -->
+    <!-- 🔵 Top Header Bar နှင့် Menu Icon -->
     <header class="top-header-bar">
-        <!-- ☰ Menu Icon ခလုတ် (ဘယ်ဘက်ခြမ်း) -->
         <button class="menu-icon-btn" onclick="toggleMenu()" title="Menu ဖွင့်ရန်">
             <span></span>
             <span></span>
@@ -19,7 +18,7 @@
 
         <div class="header-title" id="headerTitleText">🎮 Quiz Mode</div>
 
-        <!-- 📂 Menu နှိပ်လျှင် ကျလာမည့် Dropdown Menu -->
+        <!-- 📂 Dropdown Menu -->
         <div id="dropdownMenu" class="dropdown-menu-box">
             <button id="dropItemQuiz" class="dropdown-item active" onclick="switchPage('quiz')">🎮 Quiz Mode</button>
             <button id="dropItemDash" class="dropdown-item" onclick="switchPage('dashboard')">⚙️ Admin Dashboard</button>
@@ -75,6 +74,7 @@
 
             <div class="btn-group">
                 <button class="btn-primary" onclick="addQuizSet()">+ သိမ်းဆည်းမည်</button>
+                <button class="btn-primary" style="background: #0ea5e9;" onclick="openBackupModal()">💾 Backup သိမ်းဆည်းရန်</button>
                 <button class="btn-danger" onclick="clearAllData()">အချက်အလက်အားလုံး ဖျက်မည်</button>
             </div>
         </div>
@@ -82,6 +82,28 @@
         <h3 style="margin-bottom: 15px; text-align: left; color: #1e293b;">📋 လက်ရှိ မေးခွန်းစာရင်း</h3>
         <div class="item-list" id="dashboardList"></div>
     </main>
+
+    <!-- 📦 Backup Options Modal Popup -->
+    <div id="backupModal" class="backup-modal-overlay">
+        <div class="backup-modal-card">
+            <h3>💾 Backup သိမ်းဆည်းမည့် နည်းလမ်းကို ရွေးပါ</h3>
+            <p>သင်၏ မေးခွန်းဒေတာများ မပျောက်ပျက်စေရန် အောက်ပါနည်းလမ်း ၃ ခုမှ တစ်ခုကို ရွေးချယ်ပါ။</p>
+            
+            <button class="backup-option-btn" onclick="backupToLocalFolder()">
+                📁 ၁။ Local Folder Path ကိုယ်တိုင်ရွေးပြီး သိမ်းမည်
+            </button>
+            
+            <button class="backup-option-btn" onclick="backupToDownloadsFolder()">
+                📥 ၂။ Downloads Folder ထဲတွင် နာမည်ပေး၍ သိမ်းမည်
+            </button>
+            
+            <button class="backup-option-btn" onclick="backupToGoogleDrive()">
+                ☁️ ၃။ Google Drive (GDrive) ထဲသို့ တိုက်ရိုက် တင်မည်
+            </button>
+
+            <button class="backup-close-btn" onclick="closeBackupModal()">ပိတ်မည် (Cancel)</button>
+        </div>
+    </div>
 
     <!-- Scripts -->
     <script src="kanji.js"></script>

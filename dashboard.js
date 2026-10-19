@@ -1,121 +1,172 @@
-// Dynamic Kanji Box ထပ်ထည့်ပေးခြင်း (အများဆုံး ၁၀ ခုအထိ)
-function addKanjiInputBox(value = "") {
-    let container = document.getElementById("kanjiInputsContainer");
-    if (!container) return;
-    
-    let currentBoxes = container.getElementsByClassName("kanji-input-row");
-    if (currentBoxes.length >= 10) {
-        alert("အများဆုံး ၁၀ လုံး (၁၀ ကွက်) အထိသာ ထည့်ခွင့်ပြုပါသည်။");
-        return;
-    }
+// --- DASHBOARD & CRUD LOGIC ---
 
-    let row = document.createElement("div");
-    row.className = "kanji-input-row";
-    row.innerHTML = `
-        <input type="text" class="kanji-box" placeholder="Kanji ထည့်ရန်" value="${value}" maxlength="3" required>
-        <button type="button" class="remove-kanji-btn" onclick="removeKanjiInputBox(this)">✕</button>
-    `;
-    container.appendChild(row);
-}
-
-// Kanji Box ကို ပြန်ဖျက်ခြင်း
-function removeKanjiInputBox(btn) {
-    let container = document.getElementById("kanjiInputsContainer");
-    if (container.getElementsByClassName("kanji-input-row").length <= 2) {
-        alert("အနည်းဆုံး Kanji ၂ ကွက် ရှိရပါမည်။");
-        return;
-    }
-    btn.parentElement.remove();
-}
-
-// Dashboard စာရင်းများ ပြသခြင်း
 function renderDashboard() {
     let listContainer = document.getElementById("dashboardList");
     if (!listContainer) return;
+
+    loadDatabase();
     listContainer.innerHTML = "";
 
-    if (quizDatabase.length === 0) {
-        listContainer.innerHTML = "<p style='color:#64748b; text-align:left;'>မေးခွန်းများ မရှိသေးပါ။ အပေါ်တွင် မေးခွန်းများ ထည့်ပါ။</p>";
+    if (window.quizDatabase.length === 0) {
+        listContainer.innerHTML = `<div style="text-align: center; color: #64748b; padding: 20px;">မေးခွန်းများ မရှိသေးပါ။</div>`;
         return;
     }
 
-    quizDatabase.forEach((item, index) => {
-        let div = document.createElement("div");
-        div.className = "list-item";
+    window.quizDatabase.forEach((item, index) => {
         let kanjiBadges = item.kanjis.map(k => `<span class="kanji-badge">${k}</span>`).join("");
-
-        div.innerHTML = `
+        
+        let itemDiv = document.createElement("div");
+        itemDiv.className = "list-item";
+        itemDiv.innerHTML = `
             <div>
-                <div style="margin-bottom:6px;">${kanjiBadges}</div>
-                <strong>မေးခွန်း:</strong> ${item.question}<br>
-                <strong>အဖြေမှန်:</strong> <span style="color:#22c55e; font-weight:bold;">${item.correctKanji}</span>
+                <div style="margin-bottom: 6px;">${kanjiBadges}</div>
+                <div style="font-size: 14px; color: #475569;"><b>မေးခွန်း:</b> ${item.question}</div>
+                <div style="font-size: 14px; color: #16a34a;"><b>အဖြေမှန်:</b> ${item.correctKanji}</div>
             </div>
-            <button class="btn-danger" style="padding: 6px 12px; font-size: 13px;" onclick="deleteQuizSet(${index})">ဖျက်မည်</button>
+            <button class="btn-danger" style="padding: 6px 12px; font-size: 13px;" onclick="deleteQuizItem(${index})">ဖျက်မည်</button>
         `;
-        listContainer.appendChild(div);
+        listContainer.appendChild(itemDiv);
     });
 }
 
-// မေးခွန်းအသစ် သိမ်းဆည်းခြင်း
+function addKanjiInputBox() {
+    let container = document.getElementById("kanjiInputsContainer");
+    let currentRows = container.getElementsByClassName("kanji-input-row").length;
+    
+    if (currentRows >= 10) {
+        alert("အများဆုံး ၁ ခုလျှင် ၁၀ ကွက်အထိသာ ထည့်သွင်းနိုင်ပါသည်။");
+        return;
+    }
+
+    let rowDiv = document.createElement("div");
+    rowDiv.className = "kanji-input-row";
+    rowDiv.innerHTML = `
+        <input type="text" class="kanji-box" placeholder="Kanji ထည့်ရန်" maxlength="3" required>
+        <button type="button" class="remove-kanji-btn" onclick="this.parentElement.remove()">✕</button>
+    `;
+    container.appendChild(rowDiv);
+}
+
 function addQuizSet() {
-    let boxElements = document.getElementsByClassName("kanji-box");
-    let kanjiArray = [];
-
-    for (let box of boxElements) {
+    let kanjiBoxes = document.getElementsByClassName("kanji-box");
+    let kanjis = [];
+    for (let box of kanjiBoxes) {
         let val = box.value.trim();
-        if (val) {
-            kanjiArray.push(val);
-        }
+        if (val !== "") kanjis.push(val);
     }
 
-    let qInput = document.getElementById("questionInput").value.trim();
-    let aInput = document.getElementById("answerInput").value.trim();
+    let question = document.getElementById("questionInput").value.trim();
+    let correctKanji = document.getElementById("answerInput").value.trim();
 
-    if (kanjiArray.length < 2) {
-        alert("ကျေးဇူးပြု၍ Kanji အနည်းဆုံး ၂ လုံး ထည့်ပါ။");
+    if (kanjis.length < 2) {
+        alert("ကျေးဇူးပြု၍ Kanji ကွက်လပ် အနည်းဆုံး ၂ ခု ဖြည့်ပါ။");
         return;
     }
-    if (!qInput || !aInput) {
-        alert("ကျေးဇူးပြု၍ Hiragana မေးခွန်းနှင့် အဖြေမှန် Kanji ကို ဖြည့်ပါ။");
+    if (!question || !correctKanji) {
+        alert("မေးခွန်းနှင့် အဖြေမှန်ကို ပြည့်စုံစွာ ဖြည့်ပါ။");
         return;
     }
 
-    quizDatabase.push({
-        kanjis: kanjiArray,
-        question: qInput,
-        correctKanji: aInput
-    });
+    if (!kanjis.includes(correctKanji)) {
+        alert("အဖြေမှန် Kanji သည် အပေါ်တွင် သင်ထည့်ထားသော Kanji စာရင်းထဲတွင် ပါဝင်ရပါမည်။");
+        return;
+    }
 
-    localStorage.setItem("myBoxKanjiDB", JSON.stringify(quizDatabase));
-    alert("အချက်အလက်သစ် သိမ်းဆည်းပြီးပါပြီ! 🎉");
+    loadDatabase();
+    window.quizDatabase.push({ kanjis, question, correctKanji });
+    localStorage.setItem("myBoxKanjiDB", JSON.stringify(window.quizDatabase));
 
+    alert("မေးခွန်းအသစ် သိမ်းဆည်းပြီးပါပြီ! 🎉");
+
+    // Clear Inputs
+    for (let box of kanjiBoxes) box.value = "";
     document.getElementById("questionInput").value = "";
     document.getElementById("answerInput").value = "";
-    
-    // Default 3 Boxes ပြန်ထားခြင်း
-    document.getElementById("kanjiInputsContainer").innerHTML = `
-        <div class="kanji-input-row"><input type="text" class="kanji-box" placeholder="ဥပမာ: 日" maxlength="3" required></div>
-        <div class="kanji-input-row"><input type="text" class="kanji-box" placeholder="ဥပမာ: 月" maxlength="3" required></div>
-        <div class="kanji-input-row"><input type="text" class="kanji-box" placeholder="ဥပမာ: 電車" maxlength="3" required></div>
-    `;
 
     renderDashboard();
 }
 
-// မေးခွန်း ဖျက်ခြင်း
-function deleteQuizSet(index) {
-    if (confirm("ဒီမေးခွန်းကို ဖျက်ရန် သေချာပါသလား?")) {
-        quizDatabase.splice(index, 1);
-        localStorage.setItem("myBoxKanjiDB", JSON.stringify(quizDatabase));
+function deleteQuizItem(index) {
+    if (confirm("ဤမေးခွန်းကို ဖျက်ရန် သေချာပါသလား?")) {
+        loadDatabase();
+        window.quizDatabase.splice(index, 1);
+        localStorage.setItem("myBoxKanjiDB", JSON.stringify(window.quizDatabase));
         renderDashboard();
     }
 }
 
-// အချက်အလက် အားလုံး ဖျက်ခြင်း
 function clearAllData() {
-    if (confirm("မေးခွန်း အချက်အလက် အားလုံးကို ဖျက်ပစ်မှာ သေချာပါသလား?")) {
+    if (confirm("သတိပြုရန် - အချက်အလက်အားလုံး လုံးဝ ပျောက်သွားပါမည်။ အသေအချာ ဖျက်လိုပါသလား?")) {
         localStorage.removeItem("myBoxKanjiDB");
-        loadDatabase();
+        window.quizDatabase = [];
         renderDashboard();
+        alert("ဒေတာများ အားလုံး ရှင်းလင်းပြီးပါပြီ။");
+    }
+}
+
+// --- BACKUP MODAL LOGIC ---
+
+function openBackupModal() {
+    document.getElementById("backupModal").classList.add("show");
+}
+
+function closeBackupModal() {
+    document.getElementById("backupModal").classList.remove("show");
+}
+
+async function backupToLocalFolder() {
+    closeBackupModal();
+    if ('showSaveFilePicker' in window) {
+        try {
+            const options = {
+                suggestedName: 'kanji_quiz_backup.json',
+                types: [{
+                    description: 'JSON Files',
+                    accept: { 'application/json': ['.json'] },
+                }],
+            };
+            const handle = await window.showSaveFilePicker(options);
+            const writable = await handle.createWritable();
+            await writable.write(JSON.stringify(window.quizDatabase, null, 2));
+            await writable.close();
+            alert("Local Folder ထဲသို့ Backup အောင်မြင်စွာ သိမ်းဆည်းပြီးပါပြီ! 🎉");
+        } catch (err) {
+            if (err.name !== 'AbortError') {
+                console.error(err);
+                alert("Backup သိမ်းဆည်းရာတွင် အမှားအယွင်း ရှိခဲ့ပါသည်။");
+            }
+        }
+    } else {
+        alert("သင့် Browser သည် Local Folder Direct Access ကို မထောက်ပံ့ပါ။ နည်းလမ်း ၂ (Downloads Folder) ကို အသုံးပြုပါ။");
+        backupToDownloadsFolder();
+    }
+}
+
+function backupToDownloadsFolder() {
+    closeBackupModal();
+    loadDatabase();
+    let fileName = prompt("Backup ဖိုင်နာမည် ပေးပါ:", "kanji_quiz_backup_" + new Date().toISOString().slice(0,10) + ".json");
+    if (!fileName) return;
+    
+    if (!fileName.endsWith('.json')) {
+        fileName += '.json';
+    }
+
+    let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(window.quizDatabase, null, 2));
+    let downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute("href", dataStr);
+    downloadAnchor.setAttribute("download", fileName);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+    
+    alert("Downloads Folder သို့ '" + fileName + "' အဖြစ် အောင်မြင်စွာ သိမ်းဆည်းပြီးပါပြီ! 📥");
+}
+
+function backupToGoogleDrive() {
+    closeBackupModal();
+    let confirmDrive = confirm("Google Drive နှင့် ချိတ်ဆက်ရန် Google OAuth API Key လိုအပ်ပါသည်။ ယခုလက်တလောတွင် Backup ဖိုင်ကို ဒေါင်းလုဒ်ဆွဲပြီး Google Drive ထဲသို့ ကိုယ်တိုင် Upload တင်လိုပါသလား?");
+    if (confirmDrive) {
+        backupToDownloadsFolder();
     }
 }

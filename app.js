@@ -54,7 +54,6 @@ function switchPage(pageName) {
         renderDashboard();
     }
 
-    // Dropdown ကို ပိတ်မည်
     document.getElementById("dropdownMenu").classList.remove("show");
 }
 
