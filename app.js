@@ -14,13 +14,11 @@ function loadDatabase() {
     }
 }
 
-// ☰ Menu Icon နှိပ်လျှင် Dropdown ပွင့်/ပိတ်ရန်
 function toggleMenu() {
     let menuBox = document.getElementById("dropdownMenu");
     menuBox.classList.toggle("show");
 }
 
-// Menu အပြင်ဘက်ကို နှိပ်လိုက်ရင် Dropdown ပိတ်သွားရန်
 window.onclick = function(event) {
     if (!event.target.closest('.menu-icon-btn')) {
         let menuBox = document.getElementById("dropdownMenu");
@@ -30,7 +28,6 @@ window.onclick = function(event) {
     }
 }
 
-// Page ပြောင်းလဲခြင်း (Quiz Mode သို့မဟုတ် Dashboard)
 function switchPage(pageName) {
     let quizPage = document.getElementById("quizPage");
     let dashPage = document.getElementById("dashboardPage");
@@ -57,7 +54,6 @@ function switchPage(pageName) {
     document.getElementById("dropdownMenu").classList.remove("show");
 }
 
-// Array Shuffle
 function shuffleArray(array) {
     let shuffled = [...array];
     for (let i = shuffled.length - 1; i > 0; i--) {
@@ -67,6 +63,7 @@ function shuffleArray(array) {
     return shuffled;
 }
 
+// Quiz Page သို့ ရောက်လျှင် Ready Pop-up ကို အရင်ပြမည်
 function loadQuiz() {
     loadDatabase();
     let qBox = document.getElementById("questionBox");
@@ -80,19 +77,31 @@ function loadQuiz() {
         return;
     }
 
+    document.getElementById("quizStartModal").classList.add("show");
+}
+
+// "စတင်မည်" နှိပ်မှ Quiz စတင်မည်
+function startQuizAction() {
+    document.getElementById("quizStartModal").classList.remove("show");
+
     clearInterval(timerInterval);
     timeLeft = 5;
     isAnswered = false;
+    
+    let tBox = document.getElementById("timer");
     if (tBox) tBox.innerText = "အချိန်: " + timeLeft + " စက္ကန့်";
     
     let current = window.quizDatabase[currentIndex];
+    let qBox = document.getElementById("questionBox");
     if (qBox) qBox.innerText = current.question;
+    
     document.getElementById("result").innerText = "";
     document.getElementById("nextBtn").style.display = "none";
 
     currentCorrectOriginalKanji = current.correctKanji;
     let randomizedKanjis = shuffleArray(current.kanjis);
 
+    let cContainer = document.getElementById("cardsContainer");
     if (cContainer) {
         cContainer.innerHTML = "";
         randomizedKanjis.forEach((kanjiChar, index) => {
@@ -107,6 +116,12 @@ function loadQuiz() {
     }
 
     startTimer();
+}
+
+// "မဆော့သေးဘူး" နှိပ်လျှင် Dashboard သို့ ပြန်သွားမည်
+function cancelQuizAction() {
+    document.getElementById("quizStartModal").classList.remove("show");
+    switchPage('dashboard');
 }
 
 function startTimer() {

@@ -20,7 +20,7 @@ function renderDashboard() {
         itemDiv.innerHTML = `
             <div>
                 <div style="margin-bottom: 6px;">${kanjiBadges}</div>
-                <div style="font-size: 14px; color: #475569;"><b>မေးခွန်း:</b> ${item.question}</div>
+                <div style="font-size: 14px; color: #475569;"><b>Hiragana:</b> ${item.question}</div>
                 <div style="font-size: 14px; color: #16a34a;"><b>အဖြေမှန်:</b> ${item.correctKanji}</div>
             </div>
             <button class="btn-danger" style="padding: 6px 12px; font-size: 13px;" onclick="deleteQuizItem(${index})">ဖျက်မည်</button>
@@ -41,10 +41,73 @@ function addKanjiInputBox() {
     let rowDiv = document.createElement("div");
     rowDiv.className = "kanji-input-row";
     rowDiv.innerHTML = `
-        <input type="text" class="kanji-box" placeholder="Kanji ထည့်ရန်" maxlength="3" required>
-        <button type="button" class="remove-kanji-btn" onclick="this.parentElement.remove()">✕</button>
+        <input type="text" class="kanji-box" placeholder="Kanji ထည့်ရန်" maxlength="3" oninput="updateAnswerSelectionButtons()" required>
+        <button type="button" class="remove-kanji-btn" onclick="this.parentElement.remove(); updateAnswerSelectionButtons();">✕</button>
     `;
     container.appendChild(rowDiv);
+    updateAnswerSelectionButtons();
+}
+
+function updateAnswerSelectionButtons() {
+    let kanjiBoxes = document.getElementsByClassName("kanji-box");
+    let selectionContainer = document.getElementById("answerSelectionContainer");
+    let hiddenInput = document.getElementById("selectedAnswerInput");
+    
+    selectionContainer.innerHTML = "";
+    let validKanjis = [];
+
+    for (let box of kanjiBoxes) {
+        let val = box.value.trim();
+        if (val !== "" && !validKanjis.includes(val)) {
+            validKanjis.push(val);
+        }
+    }
+
+    if (validKanjis.length === 0) {
+        selectionContainer.innerHTML = `<span style="color: #64748b; font-size: 13px;">(ကျေးဇူးပြု၍ အထက်ပါ Kanji Box များတွင် စာထည့်ပါ)</span>`;
+        hiddenInput.value = "";
+        return;
+    }
+
+    let currentSelected = hiddenInput.value;
+    if (!validKanjis.includes(currentSelected)) {
+        hiddenInput.value = validKanjis[0];
+    }
+
+    validKanjis.forEach((kanji) => {
+        let btn = document.createElement("button");
+        btn.type = "button";
+        btn.innerText = kanji;
+        btn.className = "kanji-select-btn";
+        btn.style.cssText = `
+            padding: 8px 16px;
+            font-size: 20px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 2px solid ${hiddenInput.value === kanji ? '#2563eb' : '#cbd5e1'};
+            background: ${hiddenInput.value === kanji ? '#eff6ff' : '#fff'};
+            color: ${hiddenInput.value === kanji ? '#2563eb' : '#334155'};
+            transition: 0.2s;
+        `;
+
+        btn.onclick = () => {
+            hiddenInput.value = kanji;
+            updateAnswerSelectionButtons();
+        };
+
+        selectionContainer.appendChild(btn);
+    });
+}
+
+document.addEventListener("input", function(e) {
+    if (e.target && e.target.classList.contains("kanji-box")) {
+        updateAnswerSelectionButtons();
+    }
+});
+
+function isHiragana(str) {
+    return /^[\u3040-\u309F\sー]+$/.test(str);
 }
 
 function addQuizSet() {
@@ -56,19 +119,22 @@ function addQuizSet() {
     }
 
     let question = document.getElementById("questionInput").value.trim();
-    let correctKanji = document.getElementById("answerInput").value.trim();
+    let correctKanji = document.getElementById("selectedAnswerInput").value.trim();
 
     if (kanjis.length < 2) {
         alert("ကျေးဇူးပြု၍ Kanji ကွက်လပ် အနည်းဆုံး ၂ ခု ဖြည့်ပါ။");
         return;
     }
-    if (!question || !correctKanji) {
-        alert("မေးခွန်းနှင့် အဖြေမှန်ကို ပြည့်စုံစွာ ဖြည့်ပါ။");
+    if (!question) {
+        alert("Hiragana မေးခွန်းကို ထည့်သွင်းပါ။");
         return;
     }
-
-    if (!kanjis.includes(correctKanji)) {
-        alert("အဖြေမှန် Kanji သည် အပေါ်တွင် သင်ထည့်ထားသော Kanji စာရင်းထဲတွင် ပါဝင်ရပါမည်။");
+    if (!isHiragana(question)) {
+        alert("မေးခွန်းသည် Hiragana သက်သက် ဖြစ်ရပါမည် (ဥပမာ: でんしゃ)။");
+        return;
+    }
+    if (!correctKanji || !kanjis.includes(correctKanji)) {
+        alert("ကျေးဇူးပြု၍ အဖြေမှန် Kanji တစ်ခုကို ရွေးချယ်ပါ။");
         return;
     }
 
@@ -78,10 +144,10 @@ function addQuizSet() {
 
     alert("မေးခွန်းအသစ် သိမ်းဆည်းပြီးပါပြီ! 🎉");
 
-    // Clear Inputs
     for (let box of kanjiBoxes) box.value = "";
     document.getElementById("questionInput").value = "";
-    document.getElementById("answerInput").value = "";
+    document.getElementById("selectedAnswerInput").value = "";
+    updateAnswerSelectionButtons();
 
     renderDashboard();
 }
@@ -105,7 +171,6 @@ function clearAllData() {
 }
 
 // --- BACKUP MODAL LOGIC ---
-
 function openBackupModal() {
     document.getElementById("backupModal").classList.add("show");
 }
@@ -161,12 +226,4 @@ function backupToDownloadsFolder() {
     downloadAnchor.remove();
     
     alert("Downloads Folder သို့ '" + fileName + "' အဖြစ် အောင်မြင်စွာ သိမ်းဆည်းပြီးပါပြီ! 📥");
-}
-
-function backupToGoogleDrive() {
-    closeBackupModal();
-    let confirmDrive = confirm("Google Drive နှင့် ချိတ်ဆက်ရန် Google OAuth API Key လိုအပ်ပါသည်။ ယခုလက်တလောတွင် Backup ဖိုင်ကို ဒေါင်းလုဒ်ဆွဲပြီး Google Drive ထဲသို့ ကိုယ်တိုင် Upload တင်လိုပါသလား?");
-    if (confirmDrive) {
-        backupToDownloadsFolder();
-    }
 }

@@ -62,14 +62,19 @@
                 <button type="button" class="add-kanji-field-btn" onclick="addKanjiInputBox()">+ Add Kanji (ကွက်လပ်ထပ်ထည့်ရန်)</button>
             </div>
 
+            <!-- Hiragana သီးသန့် မေးခွန်း Input -->
             <div class="form-group">
-                <label>Hiragana မေးခွန်း / အဓိပ္ပာယ်:</label>
-                <input type="text" id="questionInput" placeholder="ဥပမာ: でんしゃ (densha) - လျှပ်စစ်ရထား">
+                <label>Hiragana မေးခွန်း (ဥပမာ: でんしゃ):</label>
+                <input type="text" id="questionInput" placeholder="ဥပမာ: でんしゃ">
             </div>
 
+            <!-- အဖြေမှန်ကို Click နှိပ်၍ ရွေးချယ်ရန် Container -->
             <div class="form-group">
-                <label>အဖြေမှန် Kanji (အပေါ်က Box ထဲမှ တစ်ခုကို ရွေးရေးပါ):</label>
-                <input type="text" id="answerInput" placeholder="ဥပမာ: 電車">
+                <label>အဖြေမှန် Kanji ကို အောက်ပါတို့မှ နှိပ်၍ ရွေးပါ (Click to select):</label>
+                <div id="answerSelectionContainer" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 5px;">
+                    <span style="color: #64748b; font-size: 13px;">(ကျေးဇူးပြု၍ အထက်ပါ Kanji Box များတွင် စာထည့်ပါ)</span>
+                </div>
+                <input type="hidden" id="selectedAnswerInput">
             </div>
 
             <div class="btn-group">
@@ -87,7 +92,7 @@
     <div id="backupModal" class="backup-modal-overlay">
         <div class="backup-modal-card">
             <h3>💾 Backup သိမ်းဆည်းမည့် နည်းလမ်းကို ရွေးပါ</h3>
-            <p>သင်၏ မေးခွန်းဒေတာများ မပျောက်ပျက်စေရန် အောက်ပါနည်းလမ်း ၃ ခုမှ တစ်ခုကို ရွေးချယ်ပါ။</p>
+            <p>သင်၏ မေးခွန်းဒေတာများ မပျောက်ပျက်စေရန် အောက်ပါနည်းလမ်းမှ တစ်ခုကို ရွေးချယ်ပါ။</p>
             
             <button class="backup-option-btn" onclick="backupToLocalFolder()">
                 📁 ၁။ Local Folder Path ကိုယ်တိုင်ရွေးပြီး သိမ်းမည်
@@ -96,12 +101,25 @@
             <button class="backup-option-btn" onclick="backupToDownloadsFolder()">
                 📥 ၂။ Downloads Folder ထဲတွင် နာမည်ပေး၍ သိမ်းမည်
             </button>
-            
-            <button class="backup-option-btn" onclick="backupToGoogleDrive()">
-                ☁️ ၃။ Google Drive (GDrive) ထဲသို့ တိုက်ရိုက် တင်မည်
-            </button>
 
             <button class="backup-close-btn" onclick="closeBackupModal()">ပိတ်မည် (Cancel)</button>
+        </div>
+    </div>
+
+    <!-- 🎮 Quiz Ready Start Modal Popup -->
+    <div id="quizStartModal" class="backup-modal-overlay">
+        <div class="backup-modal-card" style="text-align: center;">
+            <h3 style="font-size: 20px; margin-bottom: 12px;">🎮 Kanji Quiz ကို စတင်ရန် အသင့်ဖြစ်ပြီလား။</h3>
+            <p style="margin-bottom: 25px;">အချိန်သတ်မှတ်ချက်ဖြင့် စမ်းသပ်မည်ဖြစ်ပါသည်။</p>
+            
+            <div style="display: flex; gap: 10px;">
+                <button class="backup-option-btn" style="background: #2563eb; color: white; text-align: center; border: none;" onclick="startQuizAction()">
+                    စတင်မည် (Start)
+                </button>
+                <button class="backup-close-btn" style="background: #e2e8f0; color: #334155; margin-top: 0;" onclick="cancelQuizAction()">
+                    မဆော့သေးဘူး (Cancel)
+                </button>
+            </div>
         </div>
     </div>
 
