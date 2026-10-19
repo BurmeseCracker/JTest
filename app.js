@@ -1,6 +1,6 @@
 window.quizDatabase = [];
 let currentIndex = 0;
-let timeLeft = 10;
+let timeLeft = 30;
 let timerInterval = null;
 let isAnswered = false;
 
@@ -11,8 +11,9 @@ let scoreTotal = 0;
 let hasShownStartModalThisSession = false;
 
 // Hardcore Active Match State variables
-let activeHardcoreItems = [];
-let hardcoreCurrentPairIndex = 0;
+let selectedHiraganaItem = null;
+let matchedPairsCount = 0;
+let hardcoreTotalPairs = 0;
 
 function loadDatabase() {
     let localData = localStorage.getItem("myBoxKanjiDB");
@@ -101,26 +102,13 @@ function startQuizMode(mode) {
     scoreCorrect = 0;
 
     if (currentQuizMode === 'hard') {
-        // Hardcore mode အတွက် ဒေတာများကို စုစည်းမည်
-        activeHardcoreItems = [];
-        window.quizDatabase.forEach(item => {
-            if (item.isHardcore && Array.isArray(item.question)) {
-                item.question.forEach(q => {
-                    activeHardcoreItems.push({
-                        kanjis: item.kanjis,
-                        question: q,
-                        correctKanji: item.correctKanji[q]
-                    });
-                });
-            }
-        });
-
-        if (activeHardcoreItems.length === 0) {
-            alert("Hardcore မေးခွန်းများ မရှိသေးပါ။ Dashboard တွင် Hardcore Switch ဖွင့်၍ မေးခွန်းအသစ်များ ထည့်ပါ။");
+        let hardcoreSets = window.quizDatabase.filter(item => item.isHardcore);
+        if (hardcoreSets.length === 0) {
+            alert("Hardcore မေးခွန်းများ မရှိသေးပါ။ Dashboard တွင် Hardcore Mode ဖွင့်၍ မေးခွန်းအသစ်များ ထည့်ပါ။");
             switchPage('dashboard');
             return;
         }
-        scoreTotal = activeHardcoreItems.length;
+        scoreTotal = hardcoreSets.length;
     } else {
         scoreTotal = window.quizDatabase.length;
     }
@@ -135,23 +123,27 @@ function cancelQuizAction() {
 
 function startQuizRun() {
     clearInterval(timerInterval);
-    timeLeft = 10;
+    timeLeft = currentQuizMode === 'hard' ? 45 : 10;
     isAnswered = false;
     
     let tBox = document.getElementById("timer");
     if (tBox) tBox.innerText = "အချိန်: " + timeLeft + " စက္ကန့်";
     
-    let currentQuestionText = "";
-    let displayKanjis = [];
-    let currentCorrectOriginalKanji = "";
+    let qBox = document.getElementById("questionBox");
+    let cContainer = document.getElementById("cardsContainer");
+    let resultBox = document.getElementById("result");
+    resultBox.innerText = "";
+    document.getElementById("nextBtn").style.display = "none";
 
     if (currentQuizMode === 'easy') {
+        // --- EASY MODE LOGIC ---
         let current = window.quizDatabase[currentIndex];
-        // Easy Mode တွင် အကယ်၍ ထိုအကွက်သည် Hardcore ဖြစ်နေပါက ပထမဆုံး Hiragana ကို ယူမည်
-        currentQuestionText = Array.isArray(current.question) ? current.question[0] : current.question;
-        currentCorrectOriginalKanji = typeof current.correctKanji === 'object' ? current.correctKanji[currentQuestionText] : current.correctKanji;
+        let currentQuestionText = Array.isArray(current.question) ? current.question[0] : current.question;
+        let currentCorrectOriginalKanji = typeof current.correctKanji === 'object' ? current.correctKanji[currentQuestionText] : current.correctKanji;
         
-        displayKanjis = [currentCorrectOriginalKanji];
+        qBox.innerText = currentQuestionText;
+        
+        let displayKanjis = [currentCorrectOriginalKanji];
         let otherKanjis = current.kanjis.filter(k => k !== currentCorrectOriginalKanji);
         otherKanjis = shuffleArray(otherKanjis);
         
@@ -159,31 +151,107 @@ function startQuizRun() {
             if (displayKanjis.length < 3) displayKanjis.push(k);
         }
         displayKanjis = shuffleArray(displayKanjis);
-    } else {
-        // Hardcore Mode (မေးခွန်းကြီးထဲမှ တစ်ခုချင်းစီကို တစ်ပုဒ်စီ ထုတ်ပြမည်)
-        let item = activeHardcoreItems[currentIndex];
-        currentQuestionText = item.question;
-        currentCorrectOriginalKanji = item.correctKanji;
-        displayKanjis = shuffleArray(item.kanjis);
-    }
 
-    let qBox = document.getElementById("questionBox");
-    if (qBox) qBox.innerText = currentQuestionText;
-    
-    document.getElementById("result").innerText = "";
-    document.getElementById("nextBtn").style.display = "none";
-    
-    let cContainer = document.getElementById("cardsContainer");
-    if (cContainer) {
         cContainer.innerHTML = "";
         displayKanjis.forEach((kanjiChar, index) => {
             let cardDiv = document.createElement("div");
             cardDiv.className = "card";
-            cardDiv.id = "card-" + index;
             cardDiv.innerText = kanjiChar;
-
-            cardDiv.onclick = () => selectCard(kanjiChar, currentCorrectOriginalKanji, index);
+            cardDiv.onclick = () => selectEasyCard(kanjiChar, currentCorrectOriginalKanji, cardDiv);
             cContainer.appendChild(cardDiv);
+        });
+
+    } else {
+        // --- HARDCORE MODE (Kanji များ အပေါ်တွင် ရှိမည်၊ Hiragana များ အောက်တွင် ရှိမည်) ---
+        let currentSet = window.quizDatabase.filter(item => item.isHardcore)[currentIndex];
+        if (!currentSet) {
+            showResultsModal();
+            return;
+        }
+
+        qBox.innerText = "🔥 Hardcore Mode: အောက်ပါ Hiragana များကို နှိပ်ပြီး အပေါ်မှ Kanji များနှင့် တွဲပါ";
+        
+        let hiraganaMap = currentSet.correctKanji; 
+        let hiraganaKeys = Object.keys(hiraganaMap);
+        hardcoreTotalPairs = hiraganaKeys.length;
+        matchedPairsCount = 0;
+        selectedHiraganaItem = null;
+
+        let shuffledKanjis = shuffleArray(currentSet.kanjis);
+
+        cContainer.innerHTML = `
+            <div style="width: 100%; display: flex; flex-direction: column; gap: 15px;">
+                <div style="font-size: 13px; font-weight: bold; color: #64748b; text-align: left;">Kanji များ:</div>
+                <div id="kanjiMatchContainer" style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;"></div>
+                
+                <hr style="border: 0; border-top: 1px solid #e2e8f0; width: 100%; margin: 5px 0;">
+                
+                <div style="font-size: 13px; font-weight: bold; color: #64748b; text-align: left;">Hiragana များကို နှိပ်ပါ:</div>
+                <div id="hiraganaMatchContainer" style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;"></div>
+            </div>
+        `;
+
+        let kMatchContainer = document.getElementById("kanjiMatchContainer");
+        let hMatchContainer = document.getElementById("hiraganaMatchContainer");
+
+        shuffledKanjis.forEach(kChar => {
+            let kBtn = document.createElement("button");
+            kBtn.className = "match-btn kanji-match-btn";
+            kBtn.innerText = kChar;
+            kBtn.style.cssText = "padding: 12px 18px; font-size: 22px; font-weight: bold; background: #fff; border: 2px solid #cbd5e1; border-radius: 8px; cursor: pointer; min-width: 50px;";
+            
+            kBtn.onclick = () => {
+                if (kBtn.classList.contains('matched') || !selectedHiraganaItem) return;
+
+                if (selectedHiraganaItem.correct === kChar) {
+                    selectedHiraganaItem.element.classList.add('matched');
+                    selectedHiraganaItem.element.style.background = "#dcfce7";
+                    selectedHiraganaItem.element.style.borderColor = "#22c55e";
+                    selectedHiraganaItem.element.style.color = "#166534";
+                    selectedHiraganaItem.element.disabled = true;
+
+                    kBtn.classList.add('matched');
+                    kBtn.style.background = "#dcfce7";
+                    kBtn.style.borderColor = "#22c55e";
+                    kBtn.style.color = "#166534";
+                    kBtn.disabled = true;
+
+                    selectedHiraganaItem = null;
+                    matchedPairsCount++;
+
+                    if (matchedPairsCount === hardcoreTotalPairs) {
+                        scoreCorrect++;
+                        clearInterval(timerInterval);
+                        resultBox.style.color = "#22c55e";
+                        resultBox.innerText = "Hardcore အားလုံး မှန်ကန်ပါတယ်! 🎉";
+                        isAnswered = true;
+                        document.getElementById("nextBtn").style.display = "inline-block";
+                    }
+                } else {
+                    kBtn.style.background = "#fee2e2";
+                    kBtn.style.borderColor = "#ef4444";
+                    setTimeout(() => {
+                        kBtn.style.background = "#fff";
+                        kBtn.style.borderColor = "#cbd5e1";
+                    }, 500);
+                }
+            };
+            kMatchContainer.appendChild(kBtn);
+        });
+
+        shuffleArray(hiraganaKeys).forEach(hKey => {
+            let hBtn = document.createElement("button");
+            hBtn.className = "match-btn hiragana-match-btn";
+            hBtn.innerText = hKey;
+            hBtn.style.cssText = "padding: 10px 16px; font-size: 16px; font-weight: bold; background: #f8fafc; border: 2px solid #cbd5e1; border-radius: 8px; cursor: pointer;";
+            
+            hBtn.onclick = () => {
+                if (hBtn.classList.contains('matched')) return;
+                document.querySelectorAll('.hiragana-match-btn').forEach(b => b.style.borderColor = "#cbd5e1");
+                hBtn.style.borderColor = "#2563eb";
+                selectedHiraganaItem = { key: hKey, element: hBtn, correct: hiraganaMap[hKey] };
+            };
+            hMatchContainer.appendChild(hBtn);
         });
     }
 
@@ -199,22 +267,17 @@ function startTimer() {
         if (timeLeft <= 0) {
             clearInterval(timerInterval);
             if (!isAnswered) {
-                // အချိန်ကုန်သွားပါက ပထမဆုံး card သို့မဟုတ် မှန်ကန်သော card ကို ဖော်ပြမည်
-                let cards = document.getElementsByClassName("card");
-                for (let i = 0; i < cards.length; i++) {
-                    cards[i].classList.add("wrong");
-                }
+                isAnswered = true;
                 let resultBox = document.getElementById("result");
                 resultBox.style.color = "#ef4444";
                 resultBox.innerText = "အချိန်ကုန်သွားပါပြီ ⌛ ❌";
-                isAnswered = true;
                 document.getElementById("nextBtn").style.display = "inline-block";
             }
         }
     }, 1000);
 }
 
-function selectCard(selectedKanji, correctKanji, clickedIndex) {
+function selectEasyCard(selectedKanji, correctKanji, cardElement) {
     if (isAnswered) return;
     isAnswered = true;
     clearInterval(timerInterval);
@@ -232,7 +295,7 @@ function selectCard(selectedKanji, correctKanji, clickedIndex) {
         resultBox.style.color = "#22c55e";
         resultBox.innerText = "မှန်ကန်ပါတယ်! 🎉";
     } else {
-        cards[clickedIndex].classList.add("wrong");
+        cardElement.classList.add("wrong");
         resultBox.style.color = "#ef4444";
         resultBox.innerText = "အဖြေမှားယွင်းနေပါတယ် ❌";
     }
@@ -242,7 +305,7 @@ function selectCard(selectedKanji, correctKanji, clickedIndex) {
 
 function nextQuiz() {
     currentIndex++;
-    let totalLimit = currentQuizMode === 'hard' ? activeHardcoreItems.length : window.quizDatabase.length;
+    let totalLimit = currentQuizMode === 'hard' ? window.quizDatabase.filter(item => item.isHardcore).length : window.quizDatabase.length;
     
     if (currentIndex < totalLimit) {
         startQuizRun();
