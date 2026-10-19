@@ -3,23 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kanji Quiz - Admin Panel</title>
+    <title>Kanji Card Quiz App</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- 🔵 Professional Blue Navigation Bar -->
+    <!-- Navigation Bar -->
     <nav class="navbar">
         <div class="brand">
             <span>🏮</span> Kanji App Manager
         </div>
         <div class="nav-links">
-            <button class="nav-item active" onclick="switchPage('quiz')">🎮 Quiz Page</button>
+            <button class="nav-item active" onclick="switchPage('quiz')">🎮 Quiz Mode</button>
             <button class="nav-item" onclick="switchPage('dashboard')">⚙️ Admin Dashboard</button>
         </div>
     </nav>
 
-    <!-- 🎮 PAGE 1: Quiz Playing Page -->
+    <!-- 🎮 PAGE 1: Quiz Mode View -->
     <main id="quizPage" class="page-view active">
         <div class="quiz-card-wrapper">
             <div id="timer">အချိန်: 5 စက္ကန့်</div>
@@ -35,27 +35,41 @@
         </div>
     </main>
 
-    <!-- ⚙️ PAGE 2: Admin Dashboard Panel -->
+    <!-- ⚙️ PAGE 2: Admin Dashboard View -->
     <main id="dashboardPage" class="page-view">
-        <h2 style="margin-bottom: 20px; text-align: left; color: #1e293b;">⚙️ Kanji Set Management</h2>
-        
         <div class="admin-card">
             <h3>+ မေးခွန်း / Kanji အချက်အလက်သစ် ထည့်သွင်းရန်</h3>
+            
+            <!-- Dynamic Kanji Boxes Container (Default ၃ ခုပါမည်၊ အများဆုံး ၁၀ ခုအထိ ထည့်နိုင်သည်) -->
             <div class="form-group">
-                <label>Kanji စာလုံးများ (ကော်မာ , ခြား၍ ရေးပါ):</label>
-                <input type="text" id="kanjiInput" placeholder="ဥပမာ: 車, 電車, 駅">
+                <label>Kanji စာလုံးများ (တစ်ကွက်လျှင် တစ်လုံး သို့မဟုတ် တွဲလုံး ၂ လုံးထည့်ပါ):</label>
+                <div id="kanjiInputsContainer">
+                    <div class="kanji-input-row">
+                        <input type="text" class="kanji-box" placeholder="ဥပမာ: 日" maxlength="3" required>
+                    </div>
+                    <div class="kanji-input-row">
+                        <input type="text" class="kanji-box" placeholder="ဥပမာ: 月" maxlength="3" required>
+                    </div>
+                    <div class="kanji-input-row">
+                        <input type="text" class="kanji-box" placeholder="ဥပမာ: 電車" maxlength="3" required>
+                    </div>
+                </div>
+                <button type="button" class="add-kanji-field-btn" onclick="addKanjiInputBox()">+ Add Kanji (ကွက်လပ်ထပ်ထည့်ရန်)</button>
             </div>
+
             <div class="form-group">
                 <label>Hiragana မေးခွန်း / အဓိပ္ပာယ်:</label>
                 <input type="text" id="questionInput" placeholder="ဥပမာ: でんしゃ (densha) - လျှပ်စစ်ရထား">
             </div>
+
             <div class="form-group">
-                <label>အဖြေမှန် Kanji:</label>
+                <label>အဖြေမှန် Kanji (အပေါ်က Box ထဲမှ တစ်ခုကို ရွေးရေးပါ):</label>
                 <input type="text" id="answerInput" placeholder="ဥပမာ: 電車">
             </div>
+
             <div class="btn-group">
                 <button class="btn-primary" onclick="addQuizSet()">+ သိမ်းဆည်းမည်</button>
-                <button class="btn-secondary" onclick="clearAllData()">အချက်အလက်အားလုံး ဖျက်မည်</button>
+                <button class="btn-danger" onclick="clearAllData()">အချက်အလက်အားလုံး ဖျက်မည်</button>
             </div>
         </div>
 
@@ -63,7 +77,7 @@
         <div class="item-list" id="dashboardList"></div>
     </main>
 
-    <!-- JS ဖိုင် ၃ ခုကို အချိတ်အဆက်မပျက်အောင် ထည့်ထားသော်လည်း အလွတ်ထားပါမည် -->
+    <!-- JS Files -->
     <script src="kanji.js"></script>
     <script src="quiz.js"></script>
     <script src="ans.js"></script>
@@ -71,9 +85,8 @@
     <script>
         let quizDatabase = [];
 
-        // LocalStorage မှ အချက်အလက်များကိုသာ ဖတ်ယူမည်
         function loadDatabase() {
-            let localData = localStorage.getItem("myAdminQuizDB");
+            let localData = localStorage.getItem("myBoxKanjiDB");
             if (localData) {
                 quizDatabase = JSON.parse(localData);
             } else {
@@ -81,7 +94,6 @@
             }
         }
 
-        // Page Switcher
         function switchPage(pageName) {
             document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.page-view').forEach(page => page.classList.remove('active'));
@@ -97,78 +109,125 @@
             }
         }
 
-        // Render Dashboard Items
+        // '+ Add Kanji' ကို နှိပ်လျှင် Box အသစ် ထပ်ထည့်ပေးခြင်း (အများဆုံး ၁၀ လုံးအထိ)
+        function addKanjiInputBox(value = "") {
+            let container = document.getElementById("kanjiInputsContainer");
+            let currentBoxes = container.getElementsByClassName("kanji-input-row");
+            
+            if (currentBoxes.length >= 10) {
+                alert("အများဆုံး ၁၀ လုံး (၁၀ ကွက်) အထိသာ ထည့်ခွင့်ပြုပါသည်။");
+                return;
+            }
+
+            let row = document.createElement("div");
+            row.className = "kanji-input-row";
+            row.innerHTML = `
+                <input type="text" class="kanji-box" placeholder="Kanji ထည့်ရန်" value="${value}" maxlength="3" required>
+                <button type="button" class="remove-kanji-btn" onclick="removeKanjiInputBox(this)">✕</button>
+            `;
+            container.appendChild(row);
+        }
+
+        function removeKanjiInputBox(btn) {
+            let container = document.getElementById("kanjiInputsContainer");
+            if (container.getElementsByClassName("kanji-input-row").length <= 2) {
+                alert("အနည်းဆုံး Kanji ၂ ကွက် ရှိရပါမည်။");
+                return;
+            }
+            btn.parentElement.remove();
+        }
+
+        // Dashboard List Rendering
         function renderDashboard() {
             let listContainer = document.getElementById("dashboardList");
             listContainer.innerHTML = "";
 
             if (quizDatabase.length === 0) {
-                listContainer.innerHTML = "<p style='color:#64748b; text-align:left;'>မေးခွန်းများ မရှိသေးပါ။ အပေါ်တွင် မေးခွန်းအသစ် ထည့်ပါ၊</p>";
+                listContainer.innerHTML = "<p style='color:#64748b; text-align:left;'>မေးခွန်းများ မရှိသေးပါ။ အပေါ်တွင် အချက်အလက်များ ထည့်ပါ။</p>";
                 return;
             }
 
             quizDatabase.forEach((item, index) => {
                 let div = document.createElement("div");
                 div.className = "list-item";
+                let kanjiBadges = item.kanjis.map(k => `<span class="kanji-badge">${k}</span>`).join("");
+
                 div.innerHTML = `
-                    <div class="list-item-info">
+                    <div>
+                        <div style="margin-bottom:6px;">${kanjiBadges}</div>
                         <strong>မေးခွန်း:</strong> ${item.question}<br>
-                        <strong>Kanji စာလုံးများ:</strong> ${item.kanjis.join(", ")} | 
                         <strong>အဖြေမှန်:</strong> <span style="color:#22c55e; font-weight:bold;">${item.correctKanji}</span>
                     </div>
-                    <button class="btn-danger" onclick="deleteQuizSet(${index})">ဖျက်မည်</button>
+                    <button class="btn-danger" style="padding: 6px 12px; font-size: 13px;" onclick="deleteQuizSet(${index})">ဖျက်မည်</button>
                 `;
                 listContainer.appendChild(div);
             });
         }
 
-        // Add New Quiz Set
+        // Save New Quiz Set
         function addQuizSet() {
-            let kInput = document.getElementById("kanjiInput").value.trim();
+            let boxElements = document.getElementsByClassName("kanji-box");
+            let kanjiArray = [];
+
+            for (let box of boxElements) {
+                let val = box.value.trim();
+                if (val) {
+                    kanjiArray.push(val);
+                }
+            }
+
             let qInput = document.getElementById("questionInput").value.trim();
             let aInput = document.getElementById("answerInput").value.trim();
 
-            if (!kInput || !qInput || !aInput) {
-                alert("ကျေးဇူးပြု၍ အကွက်အားလုံး ဖြည့်ပါ!");
+            if (kanjiArray.length < 2) {
+                alert("ကျေးဇူးပြု၍ Kanji အနည်းဆုံး ၂ လုံး ထည့်ပါ။");
+                return;
+            }
+            if (!qInput || !aInput) {
+                alert("ကျေးဇူးပြု၍ Hiragana မေးခွန်းနှင့် အဖြေမှန် Kanji ကို ဖြည့်ပါ။");
                 return;
             }
 
-            let kanjiArray = kInput.split(",").map(s => s.trim());
             quizDatabase.push({
                 kanjis: kanjiArray,
                 question: qInput,
                 correctKanji: aInput
             });
 
-            localStorage.setItem("myAdminQuizDB", JSON.stringify(quizDatabase));
-            alert("အချက်အလက်သစ် သိမ်းပြီးပါပြီ! 🎉");
+            localStorage.setItem("myBoxKanjiDB", JSON.stringify(quizDatabase));
+            alert("အချက်အလက်သစ် သိမ်းဆည်းပြီးပါပြီ! 🎉");
 
-            document.getElementById("kanjiInput").value = "";
+            // Form Fields ကို ရှင်းလင်းမည်
             document.getElementById("questionInput").value = "";
             document.getElementById("answerInput").value = "";
+            
+            // Default Box ၃ ခုသို့ ပြန်ပြောင်းမည်
+            document.getElementById("kanjiInputsContainer").innerHTML = `
+                <div class="kanji-input-row"><input type="text" class="kanji-box" placeholder="ဥပမာ: 日" maxlength="3" required></div>
+                <div class="kanji-input-row"><input type="text" class="kanji-box" placeholder="ဥပမာ: 月" maxlength="3" required></div>
+                <div class="kanji-input-row"><input type="text" class="kanji-box" placeholder="ဥပမာ: 電車" maxlength="3" required></div>
+            `;
 
             renderDashboard();
         }
 
-        // Delete Single Set
         function deleteQuizSet(index) {
             if (confirm("ဒီမေးခွန်းကို ဖျက်ရန် သေချာပါသလား?")) {
                 quizDatabase.splice(index, 1);
-                localStorage.setItem("myAdminQuizDB", JSON.stringify(quizDatabase));
+                localStorage.setItem("myBoxKanjiDB", JSON.stringify(quizDatabase));
                 renderDashboard();
             }
         }
 
-        // Clear All Data
         function clearAllData() {
             if (confirm("မေးခွန်း အချက်အလက် အားလုံးကို ဖျက်ပစ်မှာ သေချာပါသလား?")) {
-                localStorage.removeItem("myAdminQuizDB");
+                localStorage.removeItem("myBoxKanjiDB");
                 loadDatabase();
                 renderDashboard();
             }
         }
 
-        // Quiz Mechanics
+        // Quiz Logic
         let currentIndex = 0;
         let timeLeft = 5;
         let timerInterval;
@@ -187,7 +246,7 @@
         function loadQuiz() {
             loadDatabase();
             if (quizDatabase.length === 0) {
-                document.getElementById("questionBox").innerText = "မေးခွန်းများ မရှိသေးပါ။ Dashboard တက်ပြီး မေးခွန်းဖြည့်ပါ။";
+                document.getElementById("questionBox").innerText = "မေးခွန်းများ မရှိသေးပါ။ Dashboard သို့သွား၍ မေးခွန်းများ ထည့်ပါ။";
                 document.getElementById("cardsContainer").innerHTML = "";
                 document.getElementById("timer").innerText = "အချိန်: -";
                 return;
