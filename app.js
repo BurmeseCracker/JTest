@@ -14,48 +14,48 @@ function loadDatabase() {
     }
 }
 
-// ☰ Menu Toggle (Menu Pinned Dropdown ဖွင့်/ပိတ်)
+// ☰ Menu Icon နှိပ်လျှင် Dropdown ပွင့်/ပိတ်ရန်
 function toggleMenu() {
-    let dropdown = document.getElementById("menuDropdown");
-    dropdown.classList.toggle("show");
+    let menuBox = document.getElementById("dropdownMenu");
+    menuBox.classList.toggle("show");
 }
 
-// Menu အပြင်ဘက်ကို နှိပ်လိုက်ရင် Menu Dropdown ပိတ်သွားစေရန်
+// Menu အပြင်ဘက်ကို နှိပ်လိုက်ရင် Dropdown ပိတ်သွားရန်
 window.onclick = function(event) {
-    if (!event.target.matches('.hamburger-btn') && !event.target.matches('.hamburger-btn span')) {
-        let dropdown = document.getElementById("menuDropdown");
-        if (dropdown && dropdown.classList.contains('show')) {
-            dropdown.classList.remove('show');
+    if (!event.target.closest('.menu-icon-btn')) {
+        let menuBox = document.getElementById("dropdownMenu");
+        if (menuBox && menuBox.classList.contains('show')) {
+            menuBox.classList.remove('show');
         }
     }
 }
 
-// Page ရွေးချယ်ခြင်း
-function selectPage(pageName) {
+// Page ပြောင်းလဲခြင်း (Quiz Mode သို့မဟုတ် Dashboard)
+function switchPage(pageName) {
     let quizPage = document.getElementById("quizPage");
     let dashPage = document.getElementById("dashboardPage");
-    let headerTitle = document.getElementById("appHeaderTitle");
-    let itemQuiz = document.getElementById("menuItemQuiz");
-    let itemDash = document.getElementById("menuItemDash");
+    let headerTitle = document.getElementById("headerTitleText");
+    let dropItemQuiz = document.getElementById("dropItemQuiz");
+    let dropItemDash = document.getElementById("dropItemDash");
 
     if (pageName === 'quiz') {
         quizPage.classList.add('active');
         dashPage.classList.remove('active');
-        itemQuiz.classList.add('active');
-        itemDash.classList.remove('active');
+        dropItemQuiz.classList.add('active');
+        dropItemDash.classList.remove('active');
         headerTitle.innerText = "🎮 Quiz Mode";
         loadQuiz();
     } else {
         dashPage.classList.add('active');
         quizPage.classList.remove('active');
-        itemDash.classList.add('active');
-        itemQuiz.classList.remove('active');
+        dropItemDash.classList.add('active');
+        dropItemQuiz.classList.remove('active');
         headerTitle.innerText = "⚙️ Admin Dashboard";
         renderDashboard();
     }
 
-    // Menu ကို ပြန်ပိတ်မည်
-    document.getElementById("menuDropdown").classList.remove("show");
+    // Dropdown ကို ပိတ်မည်
+    document.getElementById("dropdownMenu").classList.remove("show");
 }
 
 // Array Shuffle

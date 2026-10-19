@@ -8,27 +8,21 @@
 </head>
 <body>
 
-    <!-- Header with Left Hamburger Icon -->
-    <header class="app-header-container">
-        <!-- ☰ ပုံပါအတိုင်း Hamburger Icon ခလုတ် -->
-        <button class="hamburger-btn" onclick="toggleMenu()" title="Menu ပွင့်ရန်">
+    <!-- 🔵 ပုံပါအတိုင်း အပေါ်ဆုံး Header Bar နှင့် Menu Icon -->
+    <header class="top-header-bar">
+        <!-- ☰ Menu Icon ခလုတ် (ဘယ်ဘက်ခြမ်း) -->
+        <button class="menu-icon-btn" onclick="toggleMenu()" title="Menu ဖွင့်ရန်">
             <span></span>
             <span></span>
             <span></span>
         </button>
 
-        <div class="brand-area">
-            <h1 id="appHeaderTitle">🎮 Quiz Mode</h1>
-        </div>
+        <div class="header-title" id="headerTitleText">🎮 Quiz Mode</div>
 
-        <!-- 📂 Icon နှိပ်လျှင် ပွင့်လာမည့် Dropdown Menu -->
-        <div id="menuDropdown" class="menu-dropdown">
-            <button id="menuItemQuiz" class="menu-dropdown-item active" onclick="selectPage('quiz')">
-                🎮 Quiz Mode
-            </button>
-            <button id="menuItemDash" class="menu-dropdown-item" onclick="selectPage('dashboard')">
-                ⚙️ Admin Dashboard
-            </button>
+        <!-- 📂 Menu နှိပ်လျှင် ကျလာမည့် Dropdown Menu -->
+        <div id="dropdownMenu" class="dropdown-menu-box">
+            <button id="dropItemQuiz" class="dropdown-item active" onclick="switchPage('quiz')">🎮 Quiz Mode</button>
+            <button id="dropItemDash" class="dropdown-item" onclick="switchPage('dashboard')">⚙️ Admin Dashboard</button>
         </div>
     </header>
 
