@@ -14,12 +14,13 @@ function renderDashboard() {
 
     window.quizDatabase.forEach((item, index) => {
         let kanjiBadges = item.kanjis.map(k => `<span class="kanji-badge">${k}</span>`).join("");
+        let hardcoreBadge = item.isHardcore ? `<span style="background: #fee2e2; color: #ef4444; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; margin-left: 6px;">🔥 Hardcore</span>` : "";
         
         let itemDiv = document.createElement("div");
         itemDiv.className = "list-item";
         itemDiv.innerHTML = `
             <div>
-                <div style="margin-bottom: 6px;">${kanjiBadges}</div>
+                <div style="margin-bottom: 6px;">${kanjiBadges} ${hardcoreBadge}</div>
                 <div style="font-size: 14px; color: #475569;"><b>Hiragana:</b> ${item.question}</div>
                 <div style="font-size: 14px; color: #16a34a;"><b>အဖြေမှန်:</b> ${item.correctKanji}</div>
             </div>
@@ -33,8 +34,8 @@ function addKanjiInputBox() {
     let container = document.getElementById("kanjiInputsContainer");
     let currentRows = container.getElementsByClassName("kanji-input-row").length;
     
-    if (currentRows >= 10) {
-        alert("Kanji ကွက်လပ် အများဆုံး ၁၀ ခုအထိသာ ထည့်သွင်းနိုင်ပါသည်။");
+    if (currentRows >= 15) {
+        alert("Kanji ကွက်လပ် အများဆုံး ၁၅ ခုအထိသာ ထည့်သွင်းနိုင်ပါသည်။");
         return;
     }
 
@@ -48,13 +49,12 @@ function addKanjiInputBox() {
     updateAllRowAnswerDropdowns();
 }
 
-// 🤹 Hiragana မေးခွန်းကွက်လပ် အသစ်ထပ်ထည့်ရန်
 function addHiraganaInputBox() {
     let container = document.getElementById("hiraganaInputsContainer");
     let currentRows = container.getElementsByClassName("hiragana-input-row").length;
     
-    if (currentRows >= 10) {
-        alert("Hiragana မေးခွန်းကွက်လပ် အများဆုံး ၁၀ ခုအထိသာ ထည့်သွင်းနိုင်ပါသည်။");
+    if (currentRows >= 15) {
+        alert("Hiragana မေးခွန်းကွက်လပ် အများဆုံး ၁၅ ခုအထိသာ ထည့်သွင်းနိုင်ပါသည်။");
         return;
     }
 
@@ -63,19 +63,23 @@ function addHiraganaInputBox() {
     rowDiv.style.cssText = "display: flex; gap: 8px; margin-bottom: 10px; align-items: center; flex-wrap: wrap; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;";
     
     rowDiv.innerHTML = `
-        <input type="text" class="hiragana-box" placeholder="Hiragana မေးခွန်းထည့်ရန်" style="flex: 2; min-width: 150px; padding: 9px; font-size: 15px; border: 1px solid #cbd5e1; border-radius: 6px;" required>
-        <select class="row-answer-select" style="flex: 1; min-width: 100px; padding: 9px; font-size: 15px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; font-weight: bold; color: #2563eb;">
+        <input type="text" class="hiragana-box" placeholder="Hiragana မေးခွန်းထည့်ရန်" style="flex: 2; min-width: 130px; padding: 9px; font-size: 15px; border: 1px solid #cbd5e1; border-radius: 6px;" required>
+        <select class="row-answer-select" style="flex: 1; min-width: 90px; padding: 9px; font-size: 15px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; font-weight: bold; color: #2563eb;">
             <option value="">အဖြေမှန်ရွေးပါ</option>
         </select>
+        <div class="switch-container">
+            <span>Hardcore</span>
+            <label class="switch">
+                <input type="checkbox" class="hardcore-switch">
+                <span class="slider"></span>
+            </label>
+        </div>
         <button type="button" class="remove-kanji-btn" onclick="this.parentElement.remove()">✕</button>
     `;
     container.appendChild(rowDiv);
-    
-    // အသစ်ထည့်လိုက်တဲ့ Row ရဲ့ Dropdown ထဲကိုလည်း လက်ရှိ Kanji တွေ ဝင်လာအောင် လုပ်ပေးမည်
     updateAllRowAnswerDropdowns();
 }
 
-// 🔄 Kanji Box တွေ ပြောင်းလဲတိုင်း Hiragana Row တိုင်းရဲ့ Dropdown တွေကို အလိုအလျောက် Update လုပ်ပေးခြင်း
 function updateAllRowAnswerDropdowns() {
     let kanjiBoxes = document.getElementsByClassName("kanji-box");
     let validKanjis = [];
@@ -89,7 +93,7 @@ function updateAllRowAnswerDropdowns() {
 
     let answerSelects = document.getElementsByClassName("row-answer-select");
     for (let select of answerSelects) {
-        let previousSelected = select.value; // ယခင်ရွေးထားတာ မှတ်ထားရန်
+        let previousSelected = select.value;
         select.innerHTML = `<option value="">အဖြေမှန်ရွေးပါ</option>`;
 
         validKanjis.forEach(kanji => {
@@ -104,7 +108,6 @@ function updateAllRowAnswerDropdowns() {
     }
 }
 
-// Kanji Box ထဲမှာ စာရိုက်နေစဉ် Dropdown တွေ အလိုအလျောက် Update ဖြစ်စေရန်
 document.addEventListener("input", function(e) {
     if (e.target && e.target.classList.contains("kanji-box")) {
         updateAllRowAnswerDropdowns();
@@ -115,7 +118,6 @@ function isHiragana(str) {
     return /^[\u3040-\u309F\sー]+$/.test(str);
 }
 
-// မေးခွန်းအသစ်များ သိမ်းဆည်းခြင်း (Row တစ်ခုချင်းစီ၏ အဖြေမှန်များပါ တွဲသိမ်းမည်)
 function addQuizSet() {
     let kanjiBoxes = document.getElementsByClassName("kanji-box");
     let kanjis = [];
@@ -137,9 +139,11 @@ function addQuizSet() {
     for (let row of hiraganaRows) {
         let qBox = row.querySelector(".hiragana-box");
         let aSelect = row.querySelector(".row-answer-select");
+        let hSwitch = row.querySelector(".hardcore-switch");
 
         let question = qBox ? qBox.value.trim() : "";
         let correctKanji = aSelect ? aSelect.value : "";
+        let isHardcore = hSwitch ? hSwitch.checked : false;
 
         if (question !== "" || correctKanji !== "") {
             if (!isHiragana(question)) {
@@ -151,11 +155,11 @@ function addQuizSet() {
                 return;
             }
 
-            // Valid ဖြစ်ပါက Database ထဲသို့ တစ်ခုချင်းစီ ထည့်မည်
             window.quizDatabase.push({
                 kanjis: [...kanjis],
                 question: question,
-                correctKanji: correctKanji
+                correctKanji: correctKanji,
+                isHardcore: isHardcore
             });
             newSetsCount++;
         }
@@ -169,16 +173,22 @@ function addQuizSet() {
     localStorage.setItem("myBoxKanjiDB", JSON.stringify(window.quizDatabase));
     alert("မေးခွန်းအသစ် " + newSetsCount + " ပုဒ် အောင်မြင်စွာ သိမ်းဆည်းပြီးပါပြီ! 🎉");
 
-    // Reset Form Inputs
     for (let box of kanjiBoxes) box.value = "";
     
     let hContainer = document.getElementById("hiraganaInputsContainer");
     hContainer.innerHTML = `
         <div class="hiragana-input-row" style="display: flex; gap: 8px; margin-bottom: 10px; align-items: center; flex-wrap: wrap; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;">
-            <input type="text" class="hiragana-box" placeholder="Hiragana မေးခွန်း (ဥပမာ: でんしゃ)" style="flex: 2; min-width: 150px; padding: 9px; font-size: 15px; border: 1px solid #cbd5e1; border-radius: 6px;" required>
-            <select class="row-answer-select" style="flex: 1; min-width: 100px; padding: 9px; font-size: 15px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; font-weight: bold; color: #2563eb;">
+            <input type="text" class="hiragana-box" placeholder="Hiragana မေးခွန်း (ဥပမာ: でんしゃ)" style="flex: 2; min-width: 130px; padding: 9px; font-size: 15px; border: 1px solid #cbd5e1; border-radius: 6px;" required>
+            <select class="row-answer-select" style="flex: 1; min-width: 90px; padding: 9px; font-size: 15px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; font-weight: bold; color: #2563eb;">
                 <option value="">အဖြေမှန်ရွေးပါ</option>
             </select>
+            <div class="switch-container">
+                <span>Hardcore</span>
+                <label class="switch">
+                    <input type="checkbox" class="hardcore-switch">
+                    <span class="slider"></span>
+                </label>
+            </div>
             <button type="button" class="remove-kanji-btn" onclick="this.parentElement.remove()">✕</button>
         </div>
     `;

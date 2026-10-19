@@ -62,17 +62,25 @@
                 <button type="button" class="add-kanji-field-btn" onclick="addKanjiInputBox()">+ Add Kanji (ကွက်လပ်ထပ်ထည့်ရန်)</button>
             </div>
 
-            <!-- 🤹 Hiragana မေးခွန်းများနှင့် အတန်းလိုက် အဖြေရွေးချယ်ရန် Container -->
+            <!-- 🤹 Hiragana မေးခွန်းများနှင့် Hardcore Switch ပါဝင်သော Container -->
             <div class="form-group">
-                <label>Hiragana မေးခွန်းများနှင့် ၎င်းတို့၏ အဖြေမှန် Kanji များ:</label>
+                <label>Hiragana မေးခွန်းများ နှင့် Hardcore Switch:</label>
                 <div id="hiraganaInputsContainer">
                     <div class="hiragana-input-row" style="display: flex; gap: 8px; margin-bottom: 10px; align-items: center; flex-wrap: wrap; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;">
-                        <input type="text" class="hiragana-box" placeholder="Hiragana မေးခွန်း (ဥပမာ: でんしゃ)" style="flex: 2; min-width: 150px; padding: 9px; font-size: 15px; border: 1px solid #cbd5e1; border-radius: 6px;" required>
+                        <input type="text" class="hiragana-box" placeholder="Hiragana မေးခွန်း (ဥပမာ: でんしゃ)" style="flex: 2; min-width: 130px; padding: 9px; font-size: 15px; border: 1px solid #cbd5e1; border-radius: 6px;" required>
                         
-                        <!-- ဤ Hiragana အတွက် အဖြေမှန် Kanji ရွေးရန် Dropdown -->
-                        <select class="row-answer-select" style="flex: 1; min-width: 100px; padding: 9px; font-size: 15px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; font-weight: bold; color: #2563eb;">
+                        <select class="row-answer-select" style="flex: 1; min-width: 90px; padding: 9px; font-size: 15px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; font-weight: bold; color: #2563eb;">
                             <option value="">အဖြေမှန်ရွေးပါ</option>
                         </select>
+
+                        <!-- Hardcore Switch Option -->
+                        <div class="switch-container">
+                            <span>Hardcore</span>
+                            <label class="switch">
+                                <input type="checkbox" class="hardcore-switch">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
 
                         <button type="button" class="remove-kanji-btn" onclick="this.parentElement.remove()">✕</button>
                     </div>
@@ -111,20 +119,23 @@
         </div>
     </div>
 
-    <!-- 🎮 Quiz Ready Start Modal Popup (Shown once per session) -->
+    <!-- 🎮 Quiz Mode Selection Start Modal (Easy or Hard Mode) -->
     <div id="quizStartModal" class="backup-modal-overlay">
         <div class="backup-modal-card" style="text-align: center;">
-            <h3 style="font-size: 20px; margin-bottom: 12px;">🎮 Kanji Quiz ကို စတင်ရန် အသင့်ဖြစ်ပြီလား။</h3>
-            <p style="margin-bottom: 25px;">အချိန်သတ်မှတ်ချက်ဖြင့် စမ်းသပ်မည်ဖြစ်ပါသည်။</p>
+            <h3 style="font-size: 20px; margin-bottom: 10px;">🎮 Kanji Quiz စတင်ရန် မုဒ်ကို ရွေးပါ</h3>
+            <p style="margin-bottom: 20px; color: #64748b;">အောက်ပါတို့မှ လိုချင်သည့် ဆော့ကစားမည့်ပုံစံကို ရွေးချယ်ပါ။</p>
             
-            <div style="display: flex; gap: 10px;">
-                <button class="backup-option-btn" style="background: #2563eb; color: white; text-align: center; border: none;" onclick="startQuizAction()">
-                    စတင်မည် (Start)
-                </button>
-                <button class="backup-close-btn" style="background: #e2e8f0; color: #334155; margin-top: 0;" onclick="cancelQuizAction()">
-                    မဆော့သေးဘူး (Cancel)
-                </button>
-            </div>
+            <button class="backup-option-btn" style="background: #22c55e; color: white; text-align: center; border: none; font-size: 16px;" onclick="startQuizMode('easy')">
+                🟢 Easy Mode (Kanji ၃ ခု / Hiragana ၁ ခု)
+            </button>
+            
+            <button class="backup-option-btn" style="background: #ef4444; color: white; text-align: center; border: none; font-size: 16px; margin-bottom: 15px;" onclick="startQuizMode('hard')">
+                🔴 Hard Mode (Kanji & Hiragana အစုံအလင် / Hardcore)
+            </button>
+
+            <button class="backup-close-btn" onclick="cancelQuizAction()">
+                မဆော့သေးဘူး (Cancel)
+            </button>
         </div>
     </div>
 

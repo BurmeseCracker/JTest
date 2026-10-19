@@ -5,7 +5,8 @@ let timerInterval = null;
 let isAnswered = false;
 let currentCorrectOriginalKanji = "";
 
-// Score Tracking & Session Flags
+// Quiz Session & Mode State
+let currentQuizMode = 'easy'; // 'easy' or 'hard'
 let scoreCorrect = 0;
 let scoreTotal = 0;
 let hasShownStartModalThisSession = false;
@@ -81,12 +82,7 @@ function loadQuiz() {
         return;
     }
 
-    // Reset session score tracking
-    currentIndex = 0;
-    scoreCorrect = 0;
-    scoreTotal = window.quizDatabase.length;
-
-    // Show Ready modal only once per session
+    // Session ပထမအကြိမ် ဝင်လျှင် Easy/Hard Mode ရွေးခိုင်းသည့် Modal ပြမည်
     if (!hasShownStartModalThisSession) {
         document.getElementById("quizStartModal").classList.add("show");
     } else {
@@ -94,9 +90,16 @@ function loadQuiz() {
     }
 }
 
-function startQuizAction() {
+// User က Mode ရွေးလိုက်သည့်အခါ
+function startQuizMode(mode) {
+    currentQuizMode = mode;
     hasShownStartModalThisSession = true;
     document.getElementById("quizStartModal").classList.remove("show");
+
+    currentIndex = 0;
+    scoreCorrect = 0;
+    scoreTotal = window.quizDatabase.length;
+
     startQuizRun();
 }
 
@@ -121,12 +124,29 @@ function startQuizRun() {
     document.getElementById("nextBtn").style.display = "none";
 
     currentCorrectOriginalKanji = current.correctKanji;
-    let randomizedKanjis = shuffleArray(current.kanjis);
+    
+    let displayKanjis = [];
+
+    if (currentQuizMode === 'easy') {
+        // Easy Mode: Kanji ကတ် ၃ ခုသာ (အဖြေမှန် ၁ ခု + အခြားရလဒ် ၂ ခု သို့မဟုတ် Random)
+        displayKanjis = [currentCorrectOriginalKanji];
+        let otherKanjis = current.kanjis.filter(k => k !== currentCorrectOriginalKanji);
+        otherKanjis = shuffleArray(otherKanjis);
+        
+        for (let k of otherKanjis) {
+            if (displayKanjis.length < 3) displayKanjis.push(k);
+        }
+        // တစ်ခါတည်း ၃ ခုမပြည့်ရင်လည်း ရှိသလောက်ပြမယ်
+        displayKanjis = shuffleArray(displayKanjis);
+    } else {
+        // Hard Mode: Kanji ဘယ်လောက်ပါပါ အစုံအလင်ပြမည် (Hardcore ဖြစ်နေရင် ပိုပြီး ရှုပ်ထွေးနိုင်သည်)
+        displayKanjis = shuffleArray(current.kanjis);
+    }
 
     let cContainer = document.getElementById("cardsContainer");
     if (cContainer) {
         cContainer.innerHTML = "";
-        randomizedKanjis.forEach((kanjiChar, index) => {
+        displayKanjis.forEach((kanjiChar, index) => {
             let cardDiv = document.createElement("div");
             cardDiv.className = "card";
             cardDiv.id = "card-" + index;
@@ -210,13 +230,13 @@ function nextQuiz() {
 
 function showResultsModal() {
     let scoreText = document.getElementById("quizScoreText");
-    scoreText.innerText = `မှန်ကန်မှု ရလဒ်: ${scoreCorrect} / ${scoreTotal} ပုဒ်`;
+    scoreText.innerText = `မှန်ကန်မှု ရလဒ်: ${scoreCorrect} / ${scoreTotal} ပုဒ် (${currentQuizMode.toUpperCase()} Mode)`;
     document.getElementById("quizResultsModal").classList.add("show");
 }
 
 function closeResultsModal() {
     document.getElementById("quizResultsModal").classList.remove("show");
-    hasShownStartModalThisSession = false; // Reset to show start modal on next quiz session
+    hasShownStartModalThisSession = false; // Reset to show Mode selection on next session
     switchPage('dashboard');
 }
 
