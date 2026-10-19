@@ -8,55 +8,66 @@
 body {
     background: #f0f2f5;
     color: #333;
+    padding-bottom: 40px;
 }
 
-/* 🔵 Professional Blue Header Menu Bar */
-.navbar {
-    background: #2563eb;
+/* 🏮 App Header Container */
+.app-header {
+    background: linear-gradient(135deg, #1e293b, #0f172a);
     color: white;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 20px;
-    height: 60px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+    padding: 30px 20px;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
 
-.navbar .brand {
-    font-size: 18px;
+.app-title {
+    font-size: 22px;
     font-weight: bold;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    margin-bottom: 5px;
 }
 
-.nav-links {
-    display: flex;
-    gap: 8px;
+.app-subtitle {
+    font-size: 13px;
+    color: #94a3b8;
+    margin-bottom: 25px;
 }
 
-.nav-item {
-    background: rgba(255,255,255,0.2);
+/* 🎛️ Menu Selection Buttons (ဘားတန်းမဟုတ်ဘဲ သီးသန့် Menu ခလုတ်များ) */
+.menu-container {
+    display: inline-flex;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 6px;
+    border-radius: 14px;
+    gap: 8px;
+    backdrop-filter: blur(10px);
+}
+
+.menu-btn {
+    background: transparent;
     border: none;
-    color: white;
-    padding: 8px 14px;
-    font-size: 14px;
+    color: #94a3b8;
+    padding: 12px 24px;
+    font-size: 15px;
     font-weight: 600;
-    border-radius: 6px;
+    border-radius: 10px;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.3s ease;
 }
 
-.nav-item.active {
-    background: #ffffff;
-    color: #2563eb;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+.menu-btn:hover {
+    color: #ffffff;
+}
+
+.menu-btn.active {
+    background: #2563eb;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(37,99,235,0.4);
 }
 
 /* Page Views */
 .page-view {
     display: none;
-    padding: 25px 15px;
+    padding: 30px 15px;
     max-width: 700px;
     margin: 0 auto;
 }
@@ -68,7 +79,7 @@ body {
 /* 🎮 Quiz View UI */
 .quiz-card-wrapper {
     background: #ffffff;
-    padding: 25px;
+    padding: 30px;
     border-radius: 16px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.05);
     text-align: center;
@@ -168,7 +179,7 @@ body {
     font-size: 14px;
 }
 
-.form-group input, .form-group select {
+.form-group input {
     width: 100%;
     padding: 11px;
     font-size: 15px;
@@ -178,7 +189,6 @@ body {
     background: #fff;
 }
 
-/* Dynamic Kanji Input Fields Container */
 #kanjiInputsContainer {
     display: flex;
     flex-direction: column;
@@ -223,10 +233,6 @@ body {
     margin-top: 5px;
 }
 
-.add-kanji-field-btn:hover {
-    background: #eef2ff;
-}
-
 .btn-group {
     display: flex;
     gap: 10px;
@@ -256,7 +262,6 @@ body {
     cursor: pointer;
 }
 
-/* List item UI */
 .item-list {
     display: flex;
     flex-direction: column;
@@ -284,9 +289,4 @@ body {
     margin-right: 4px;
     display: inline-block;
     font-size: 15px;
-}
-
-@media (max-width: 480px) {
-    .card { width: 90px; height: 95px; font-size: 34px; }
-    #questionBox { font-size: 18px; }
 }
