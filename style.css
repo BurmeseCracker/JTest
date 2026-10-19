@@ -6,7 +6,6 @@ body {
     color: #1e293b;
 }
 
-/* 🔵 Top Header Bar */
 .top-header-bar {
     position: relative;
     background-color: #2563eb;
@@ -43,7 +42,6 @@ body {
     font-weight: bold;
 }
 
-/* 📂 Dropdown Menu */
 .dropdown-menu-box {
     display: none;
     position: absolute;
@@ -78,7 +76,6 @@ body {
     color: #2563eb;
 }
 
-/* 📄 Page Views */
 .page-view {
     display: none;
     padding: 20px;
@@ -90,7 +87,6 @@ body {
     display: block;
 }
 
-/* 🎮 Quiz View */
 .quiz-card-wrapper {
     background: white;
     padding: 25px;
@@ -170,7 +166,6 @@ body {
     display: none;
 }
 
-/* ⚙️ Admin Dashboard View */
 .admin-card {
     background: white;
     padding: 20px;
@@ -281,7 +276,6 @@ body {
     margin-right: 4px;
 }
 
-/* 🎚️ Hardcore Switch Styling */
 .switch-container {
     display: flex;
     align-items: center;
@@ -333,7 +327,6 @@ input:checked + .slider:before {
     transform: translateX(18px);
 }
 
-/* 📦 Modal Overlays */
 .backup-modal-overlay {
     display: none;
     position: fixed;

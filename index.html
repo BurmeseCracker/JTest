@@ -8,46 +8,37 @@
 </head>
 <body>
 
-    <!-- 🔵 Top Header Bar နှင့် Menu Icon -->
     <header class="top-header-bar">
         <button class="menu-icon-btn" onclick="toggleMenu()" title="Menu ဖွင့်ရန်">
             <span></span>
             <span></span>
             <span></span>
         </button>
-
         <div class="header-title" id="headerTitleText">🎮 Quiz Mode</div>
-
-        <!-- 📂 Dropdown Menu -->
         <div id="dropdownMenu" class="dropdown-menu-box">
             <button id="dropItemQuiz" class="dropdown-item active" onclick="switchPage('quiz')">🎮 Quiz Mode</button>
             <button id="dropItemDash" class="dropdown-item" onclick="switchPage('dashboard')">⚙️ Admin Dashboard</button>
         </div>
     </header>
 
-    <!-- 🎮 PAGE 1: Quiz Mode View -->
     <main id="quizPage" class="page-view active">
         <div class="quiz-card-wrapper">
-            <div id="timer">အချိန်: 5 စက္ကန့်</div>
-            
+            <div id="timer">အချိန်: 10 စက္ကန့်</div>
             <div class="cards-container" id="cardsContainer"></div>
-
             <div class="question-wrapper">
                 <div id="questionBox">မေးခွန်းပေါ်မည်</div>
             </div>
-
             <div id="result"></div>
             <button id="nextBtn" onclick="nextQuiz()">နောက်တစ်ပုဒ်သို့ (Next)</button>
         </div>
     </main>
 
-    <!-- ⚙️ PAGE 2: Admin Dashboard View -->
     <main id="dashboardPage" class="page-view">
         <div class="admin-card">
             <h3>+ မေးခွန်း / Kanji အချက်အလက်သစ် ထည့်သွင်းရန်</h3>
             
             <div class="form-group">
-                <label>Kanji စာလုံးများ (Hardcore ON လလျှင် ၁၀ ခုအထိ ထည့်နိုင်သည်):</label>
+                <label>Kanji စာလုံးများ (Compare Mode ON လျှင် ၁၀ ခုအထိ ထည့်နိုင်သည်):[span_2](start_span)[span_2](end_span)[span_3](start_span)[span_3](end_span)</label>
                 <div id="kanjiInputsContainer">
                     <div class="kanji-input-row">
                         <input type="text" class="kanji-box" placeholder="ဥပမာ: 日" maxlength="3" required>
@@ -59,13 +50,18 @@
                 <button type="button" class="add-kanji-field-btn" onclick="addKanjiInputBox()">+ Add Kanji (ကွက်လပ်ထပ်ထည့်ရန်)</button>
             </div>
 
-            <!-- 🤹 Hiragana မေးခွန်းများနှင့် Global Hardcore Switch -->
+            <!-- Sentence Mode Inputs -->
+            <div class="form-group" style="background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                <label style="color: #2563eb; margin-bottom: 8px;">📝 Sentence (စာကြောင်း) မေးခွန်း အချက်အလက် (Optional):</label>
+                <input type="text" id="sentenceInputBox" placeholder="ဥပမာ: あした 10じに えき で あいましょう" class="kanji-box" style="width: 100%; margin-bottom: 8px;" />
+                <input type="text" id="sentenceTargetHiragana" placeholder="မျဉ်းသားမည့် Hiragana (ဥပမာ: えき)" class="kanji-box" style="width: 100%;" />
+            </div>
+
             <div class="form-group">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
                     <label style="margin-bottom: 0;">Hiragana မေးခွန်းများ နှင့် အဖြေများ:</label>
-                    
                     <div class="switch-container">
-                        <span>Hardcore Mode</span>
+                        <span>Compare Mode</span>
                         <label class="switch">
                             <input type="checkbox" id="globalHardcoreSwitch">
                             <span class="slider"></span>
@@ -76,7 +72,6 @@
                 <div id="hiraganaInputsContainer">
                     <div class="hiragana-input-row" style="display: flex; gap: 8px; margin-bottom: 10px; align-items: center; flex-wrap: wrap; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;">
                         <input type="text" class="hiragana-box" placeholder="Hiragana မေးခွန်း (ဥပမာ: でんしゃ)" style="flex: 2; min-width: 150px; padding: 9px; font-size: 15px; border: 1px solid #cbd5e1; border-radius: 6px;" required>
-                        
                         <select class="row-answer-select" style="flex: 1; min-width: 100px; padding: 9px; font-size: 15px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; font-weight: bold; color: #2563eb;">
                             <option value="">အဖြေမှန်ရွေးပါ</option>
                         </select>
@@ -98,58 +93,48 @@
         <div class="item-list" id="dashboardList"></div>
     </main>
 
-    <!-- 📦 Backup Options Modal Popup -->
     <div id="backupModal" class="backup-modal-overlay">
         <div class="backup-modal-card">
             <h3>💾 Backup သိမ်းဆည်းမည့် နည်းလမ်းကို ရွေးပါ</h3>
-            <p>သင်၏ မေးခွန်းဒေတာများ မပျောက်ပျက်စေရန် အောက်ပါနည်းလမ်းမှ တစ်ခုကို ရွေးချယ်ပါ။</p>
-            
-            <button class="backup-option-btn" onclick="backupToLocalFolder()">
-                📁 ၁။ Local Folder Path ကိုယ်တိုင်ရွေးပြီး သိမ်းမည်
-            </button>
-            
-            <button class="backup-option-btn" onclick="backupToDownloadsFolder()">
-                📥 ၂။ Downloads Folder ထဲတွင် နာမည်ပေး၍ သိမ်းမည်
-            </button>
-
+            <button class="backup-option-btn" onclick="backupToLocalFolder()">📁 ၁။ Local Folder တွင် သိမ်းမည်</button>
+            <button class="backup-option-btn" onclick="backupToDownloadsFolder()">📥 ၂။ Downloads Folder တွင် သိမ်းမည်</button>
             <button class="backup-close-btn" onclick="closeBackupModal()">ပိတ်မည် (Cancel)</button>
         </div>
     </div>
 
-    <!-- 🎮 Quiz Mode Selection Start Modal -->
+    <!-- Quiz Start Modal with Sentence & Reverse Easy -->
     <div id="quizStartModal" class="backup-modal-overlay">
         <div class="backup-modal-card" style="text-align: center;">
             <h3 style="font-size: 20px; margin-bottom: 10px;">🎮 Kanji Quiz စတင်ရန် မုဒ်ကို ရွေးပါ</h3>
-            <p style="margin-bottom: 20px; color: #64748b;">အောက်ပါတို့မှ လိုချင်သည့် ဆော့ကစားမည့်ပုံစံကို ရွေးချယ်ပါ။</p>
             
-            <button class="backup-option-btn" style="background: #22c55e; color: white; text-align: center; border: none; font-size: 16px;" onclick="startQuizMode('easy')">
-                🟢 Easy Mode (Kanji ၃ ခု / Hiragana ၁ ခု)
+            <button class="backup-option-btn" style="background: #22c55e; color: white; text-align: center; border: none; font-size: 14px; margin-bottom: 6px;" onclick="startQuizMode('easy')">
+                🟢 Easy Mode (Hiragana Q -> Kanji Cards)[span_4](start_span)[span_4](end_span)[span_5](start_span)[span_5](end_span)
             </button>
             
-            <button class="backup-option-btn" style="background: #ef4444; color: white; text-align: center; border: none; font-size: 16px; margin-bottom: 15px;" onclick="startQuizMode('hard')">
-                🔴 Hardcore Mode (Kanji & Hiragana အစုံအလင်)
+            <button class="backup-option-btn" style="background: #10b981; color: white; text-align: center; border: none; font-size: 14px; margin-bottom: 6px;" onclick="startQuizMode('reverse_easy')">
+                🔄 Reverse Easy (Kanji Q -> Hiragana Cards)[span_6](start_span)[span_6](end_span)[span_7](start_span)[span_7](end_span)
             </button>
 
-            <button class="backup-close-btn" onclick="cancelQuizAction()">
-                မဆော့သေးဘူး (Cancel)
+            <button class="backup-option-btn" style="background: #8b5cf6; color: white; text-align: center; border: none; font-size: 14px; margin-bottom: 6px;" onclick="startQuizMode('sentence')">
+                📝 Sentence Mode (Underlined Hiragana -> Kanji)[span_8](start_span)[span_8](end_span)[span_9](start_span)[span_9](end_span)
             </button>
+            
+            <button class="backup-option-btn" style="background: #ef4444; color: white; text-align: center; border: none; font-size: 14px; margin-bottom: 12px;" onclick="startQuizMode('hard')">
+                🔴 Compare Mode (Match All)[span_10](start_span)[span_10](end_span)[span_11](start_span)[span_11](end_span)
+            </button>
+
+            <button class="backup-close-btn" onclick="cancelQuizAction()">မဆော့သေးဘူး (Cancel)</button>
         </div>
     </div>
 
-    <!-- 📊 Quiz Finish Results Modal Popup -->
     <div id="quizResultsModal" class="backup-modal-overlay">
         <div class="backup-modal-card" style="text-align: center;">
             <h3 style="font-size: 22px; margin-bottom: 15px; color: #2563eb;">🏆 Quiz ပြီးဆုံးပါပြီ!</h3>
-            <div id="quizScoreText" style="font-size: 18px; font-weight: bold; margin-bottom: 25px; color: #1e293b;">
-                မှန်ကန်မှု ရလဒ်: 0 / 0
-            </div>
-            <button class="backup-option-btn" style="background: #2563eb; color: white; text-align: center; border: none;" onclick="closeResultsModal()">
-                Dashboard သို့ ပြန်မည်
-            </button>
+            <div id="quizScoreText" style="font-size: 18px; font-weight: bold; margin-bottom: 25px; color: #1e293b;">မှန်ကန်မှု ရလဒ်: 0 / 0</div>
+            <button class="backup-option-btn" style="background: #2563eb; color: white; text-align: center; border: none;" onclick="closeResultsModal()">Dashboard သို့ ပြန်မည်</button>
         </div>
     </div>
 
-    <!-- Scripts -->
     <script src="kanji.js"></script>
     <script src="quiz.js"></script>
     <script src="ans.js"></script>
