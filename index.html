@@ -91,7 +91,7 @@
         #nextBtn:hover { background-color: #0b7dda; }
 
         @media (max-width: 480px) {
-            .card { width: 75px; height: 95px; font-size: 38px; }
+            .card { width: 75px; height: 95px; }
             #questionBox { font-size: 20px; padding: 10px 20px; }
         }
     </style>
@@ -122,17 +122,15 @@
     <script>
         let quizDatabase = [];
 
-        // window ထဲကနေ လှမ်းယူပြီး ပေါင်းစပ်ခြင်း
-        let kanjis = window.kanjiLists || [];
-        let questions = window.questionLists || [];
-
-        for (let i = 0; i < kanjis.length; i++) {
-            if (kanjis[i] && questions[i]) {
-                quizDatabase.push({
-                    kanjis: kanjis[i],
-                    question: questions[i],
-                    correctIndex: 0
-                });
+        if (typeof kanjiLists !== 'undefined' && typeof questionLists !== 'undefined') {
+            for (let i = 0; i < kanjiLists.length; i++) {
+                if (kanjiLists[i] && questionLists[i]) {
+                    quizDatabase.push({
+                        kanjis: kanjiLists[i],
+                        question: questionLists[i],
+                        correctIndex: 0
+                    });
+                }
             }
         }
 
@@ -153,7 +151,7 @@
 
         function loadQuiz() {
             if (quizDatabase.length === 0) {
-                document.getElementById("questionBox").innerText = "kanji.js သို့မဟုတ် quiz.js ဒေတာများကို ဖတ်မရပါ။";
+                document.getElementById("questionBox").innerText = "kanji.js သို့မဟုတ် quiz.js ဖိုင်ကို ရှာမတွေ့ပါ";
                 return;
             }
 
@@ -178,6 +176,14 @@
                 cardDiv.className = "card";
                 cardDiv.id = "card-" + index;
                 cardDiv.innerText = kanjiChar;
+                
+                // စာလုံး ၂ လုံး သို့မဟုတ် ပိုပါက Card ပေါ်တွင် အလျားလိုက်လှပစေရန် Font size ချုံ့ပေးခြင်း
+                if (kanjiChar.length > 1) {
+                    cardDiv.style.fontSize = "26px";
+                } else {
+                    cardDiv.style.fontSize = "45px";
+                }
+
                 cardDiv.onclick = () => selectCard(kanjiChar, currentCorrectOriginalKanji, index);
                 cardsContainer.appendChild(cardDiv);
             });
