@@ -1,12 +1,11 @@
-// Global State
 window.quizDatabase = [];
 let currentIndex = 0;
 let timeLeft = 5;
 let timerInterval = null;
 let isAnswered = false;
 let currentCorrectOriginalKanji = "";
+let currentPage = 'quiz'; // 'quiz' သို့မဟုတ် 'dashboard'
 
-// Storage မှ ဒေတာဖတ်ခြင်း
 function loadDatabase() {
     let localData = localStorage.getItem("myBoxKanjiDB");
     if (localData) {
@@ -16,25 +15,27 @@ function loadDatabase() {
     }
 }
 
-// Page View ပြောင်းလဲခြင်း Function (Quiz Mode <-> Dashboard)
-function switchPage(pageName) {
-    let quizBtn = document.getElementById("quizModeBtn");
-    let dashBtn = document.getElementById("dashboardBtn");
+// 🍔 Menu Icon ကို နှိပ်လိုက်တိုင်း Page နှစ်ခု အပြန်အလှန် ပြောင်းပေးမည့် Function
+function togglePage() {
     let quizPage = document.getElementById("quizPage");
     let dashPage = document.getElementById("dashboardPage");
+    let headerTitle = document.getElementById("appHeaderTitle");
+    let menuBtn = document.getElementById("menuToggleBtn");
 
-    if (pageName === 'quiz') {
-        quizBtn.classList.add('active');
-        dashBtn.classList.remove('active');
-        quizPage.classList.add('active');
-        dashPage.classList.remove('active');
-        loadQuiz();
-    } else {
-        dashBtn.classList.add('active');
-        quizBtn.classList.remove('active');
-        dashPage.classList.add('active');
+    if (currentPage === 'quiz') {
+        currentPage = 'dashboard';
         quizPage.classList.remove('active');
+        dashPage.classList.add('active');
+        headerTitle.innerText = "⚙️ Admin Dashboard";
+        menuBtn.innerText = "🎮"; // Quiz Mode သို့ ပြန်သွားရန် Icon ပြောင်းမည်
         renderDashboard();
+    } else {
+        currentPage = 'quiz';
+        dashPage.classList.remove('active');
+        quizPage.classList.add('active');
+        headerTitle.innerText = "🎮 Quiz Mode";
+        menuBtn.innerText = "⚙️"; // Dashboard သို့ သွားရန် Icon ပြောင်းမည်
+        loadQuiz();
     }
 }
 
@@ -48,7 +49,6 @@ function shuffleArray(array) {
     return shuffled;
 }
 
-// Quiz Game စတင်ခြင်း
 function loadQuiz() {
     loadDatabase();
     let qBox = document.getElementById("questionBox");
@@ -154,7 +154,6 @@ function nextQuiz() {
     loadQuiz();
 }
 
-// Window Load ဖြစ်သည်နှင့် စတင်မည်
 window.onload = function() {
     loadDatabase();
     loadQuiz();
