@@ -14,8 +14,8 @@
         <div class="app-subtitle">Interactive Offline Kanji Learning Platform</div>
 
         <div class="menu-container">
-            <button class="menu-btn active" onclick="switchPage('quiz')">🎮 Quiz Mode</button>
-            <button class="menu-btn" onclick="switchPage('dashboard')">⚙️ Dashboard</button>
+            <button id="quizModeBtn" class="menu-btn active" onclick="switchPage('quiz')">🎮 Quiz Mode</button>
+            <button id="dashboardBtn" class="menu-btn" onclick="switchPage('dashboard')">⚙️ Dashboard</button>
         </div>
     </header>
 
@@ -76,7 +76,7 @@
         <div class="item-list" id="dashboardList"></div>
     </main>
 
-    <!-- Scripts -->
+    <!-- Scripts (အစဉ်လိုက် သန့်သန့်ရှင်းရှင်း ချိတ်ဆက်ထားပါသည်) -->
     <script src="kanji.js"></script>
     <script src="quiz.js"></script>
     <script src="ans.js"></script>

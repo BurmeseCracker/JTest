@@ -29,10 +29,10 @@ body {
 .app-subtitle {
     font-size: 13px;
     color: #94a3b8;
-    margin-bottom: 25px;
+    margin-bottom: 20px;
 }
 
-/* 🎛️ Menu Selection Buttons (ဘားတန်းမဟုတ်ဘဲ သီးသန့် Menu ခလုတ်များ) */
+/* 🎛️ Menu Selection Buttons */
 .menu-container {
     display: inline-flex;
     background: rgba(255, 255, 255, 0.1);
@@ -46,7 +46,7 @@ body {
     background: transparent;
     border: none;
     color: #94a3b8;
-    padding: 12px 24px;
+    padding: 10px 20px;
     font-size: 15px;
     font-weight: 600;
     border-radius: 10px;
@@ -67,7 +67,7 @@ body {
 /* Page Views */
 .page-view {
     display: none;
-    padding: 30px 15px;
+    padding: 25px 15px;
     max-width: 700px;
     margin: 0 auto;
 }

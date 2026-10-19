@@ -1,8 +1,9 @@
 // Dynamic Kanji Box ထပ်ထည့်ပေးခြင်း (အများဆုံး ၁၀ ခုအထိ)
 function addKanjiInputBox(value = "") {
     let container = document.getElementById("kanjiInputsContainer");
-    let currentBoxes = container.getElementsByClassName("kanji-input-row");
+    if (!container) return;
     
+    let currentBoxes = container.getElementsByClassName("kanji-input-row");
     if (currentBoxes.length >= 10) {
         alert("အများဆုံး ၁၀ လုံး (၁၀ ကွက်) အထိသာ ထည့်ခွင့်ပြုပါသည်။");
         return;
@@ -27,14 +28,14 @@ function removeKanjiInputBox(btn) {
     btn.parentElement.remove();
 }
 
-// Dashboard List များကို Render လုပ်ခြင်း
+// Dashboard စာရင်းများ ပြသခြင်း
 function renderDashboard() {
     let listContainer = document.getElementById("dashboardList");
     if (!listContainer) return;
     listContainer.innerHTML = "";
 
     if (quizDatabase.length === 0) {
-        listContainer.innerHTML = "<p style='color:#64748b; text-align:left;'>မေးခွန်းများ မရှိသေးပါ။ အပေါ်တွင် အချက်အလက်များ ထည့်ပါ။</p>";
+        listContainer.innerHTML = "<p style='color:#64748b; text-align:left;'>မေးခွန်းများ မရှိသေးပါ။ အပေါ်တွင် မေးခွန်းများ ထည့်ပါ။</p>";
         return;
     }
 
@@ -101,7 +102,7 @@ function addQuizSet() {
     renderDashboard();
 }
 
-// မေးခွန်းတစ်ခုချင်းစီ ဖျက်ခြင်း
+// မေးခွန်း ဖျက်ခြင်း
 function deleteQuizSet(index) {
     if (confirm("ဒီမေးခွန်းကို ဖျက်ရန် သေချာပါသလား?")) {
         quizDatabase.splice(index, 1);
@@ -110,7 +111,7 @@ function deleteQuizSet(index) {
     }
 }
 
-// အချက်အလက် အားလုံးဖျက်ခြင်း
+// အချက်အလက် အားလုံး ဖျက်ခြင်း
 function clearAllData() {
     if (confirm("မေးခွန်း အချက်အလက် အားလုံးကို ဖျက်ပစ်မှာ သေချာပါသလား?")) {
         localStorage.removeItem("myBoxKanjiDB");

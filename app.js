@@ -1,32 +1,39 @@
-let quizDatabase = [];
+// Global State
+window.quizDatabase = [];
 let currentIndex = 0;
 let timeLeft = 5;
-let timerInterval;
+let timerInterval = null;
 let isAnswered = false;
 let currentCorrectOriginalKanji = "";
 
-// Database ရယူခြင်း
+// Storage မှ ဒေတာဖတ်ခြင်း
 function loadDatabase() {
     let localData = localStorage.getItem("myBoxKanjiDB");
     if (localData) {
-        quizDatabase = JSON.parse(localData);
+        window.quizDatabase = JSON.parse(localData);
     } else {
-        quizDatabase = [];
+        window.quizDatabase = [];
     }
 }
 
-// Page ပြောင်းလဲခြင်း (Quiz Mode vs Dashboard)
+// Page View ပြောင်းလဲခြင်း Function (Quiz Mode <-> Dashboard)
 function switchPage(pageName) {
-    document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
-    document.querySelectorAll('.page-view').forEach(page => page.classList.remove('active'));
+    let quizBtn = document.getElementById("quizModeBtn");
+    let dashBtn = document.getElementById("dashboardBtn");
+    let quizPage = document.getElementById("quizPage");
+    let dashPage = document.getElementById("dashboardPage");
 
     if (pageName === 'quiz') {
-        document.querySelectorAll('.nav-item')[0].classList.add('active');
-        document.getElementById('quizPage').classList.add('active');
+        quizBtn.classList.add('active');
+        dashBtn.classList.remove('active');
+        quizPage.classList.add('active');
+        dashPage.classList.remove('active');
         loadQuiz();
     } else {
-        document.querySelectorAll('.nav-item')[1].classList.add('active');
-        document.getElementById('dashboardPage').classList.add('active');
+        dashBtn.classList.add('active');
+        quizBtn.classList.remove('active');
+        dashPage.classList.add('active');
+        quizPage.classList.remove('active');
         renderDashboard();
     }
 }
@@ -41,50 +48,54 @@ function shuffleArray(array) {
     return shuffled;
 }
 
-// Quiz မေးခွန်း Load လုပ်ခြင်း
+// Quiz Game စတင်ခြင်း
 function loadQuiz() {
     loadDatabase();
-    if (quizDatabase.length === 0) {
-        document.getElementById("questionBox").innerText = "မေးခွန်းများ မရှိသေးပါ။ Dashboard သို့သွား၍ မေးခွန်းများ ထည့်ပါ။";
-        document.getElementById("cardsContainer").innerHTML = "";
-        document.getElementById("timer").innerText = "အချိန်: -";
+    let qBox = document.getElementById("questionBox");
+    let cContainer = document.getElementById("cardsContainer");
+    let tBox = document.getElementById("timer");
+
+    if (window.quizDatabase.length === 0) {
+        if (qBox) qBox.innerText = "မေးခွန်းများ မရှိသေးပါ။ Dashboard သို့သွား၍ မေးခွန်းများ ထည့်ပါ။";
+        if (cContainer) cContainer.innerHTML = "";
+        if (tBox) tBox.innerText = "အချိန်: -";
         return;
     }
 
     clearInterval(timerInterval);
     timeLeft = 5;
     isAnswered = false;
-    document.getElementById("timer").innerText = "အချိန်: " + timeLeft + " စက္ကန့်";
+    if (tBox) tBox.innerText = "အချိန်: " + timeLeft + " စက္ကန့်";
     
-    let current = quizDatabase[currentIndex];
-    document.getElementById("questionBox").innerText = current.question;
+    let current = window.quizDatabase[currentIndex];
+    if (qBox) qBox.innerText = current.question;
     document.getElementById("result").innerText = "";
     document.getElementById("nextBtn").style.display = "none";
 
     currentCorrectOriginalKanji = current.correctKanji;
     let randomizedKanjis = shuffleArray(current.kanjis);
 
-    let cardsContainer = document.getElementById("cardsContainer");
-    cardsContainer.innerHTML = "";
-    
-    randomizedKanjis.forEach((kanjiChar, index) => {
-        let cardDiv = document.createElement("div");
-        cardDiv.className = "card";
-        cardDiv.id = "card-" + index;
-        cardDiv.innerText = kanjiChar;
+    if (cContainer) {
+        cContainer.innerHTML = "";
+        randomizedKanjis.forEach((kanjiChar, index) => {
+            let cardDiv = document.createElement("div");
+            cardDiv.className = "card";
+            cardDiv.id = "card-" + index;
+            cardDiv.innerText = kanjiChar;
 
-        cardDiv.onclick = () => selectCard(kanjiChar, currentCorrectOriginalKanji, index);
-        cardsContainer.appendChild(cardDiv);
-    });
+            cardDiv.onclick = () => selectCard(kanjiChar, currentCorrectOriginalKanji, index);
+            cContainer.appendChild(cardDiv);
+        });
+    }
 
     startTimer();
 }
 
-// Timer စတင်ခြင်း
 function startTimer() {
     timerInterval = setInterval(() => {
         timeLeft--;
-        document.getElementById("timer").innerText = "အချိန်: " + timeLeft + " စက္ကန့်";
+        let tBox = document.getElementById("timer");
+        if (tBox) tBox.innerText = "အချိန်: " + timeLeft + " စက္ကန့်";
 
         if (timeLeft <= 0) {
             clearInterval(timerInterval);
@@ -95,7 +106,6 @@ function startTimer() {
     }, 1000);
 }
 
-// Card ရွေးချယ်ခြင်း
 function selectCard(selectedKanji, correctKanji, clickedIndex) {
     if (isAnswered) return;
     isAnswered = true;
@@ -108,19 +118,19 @@ function selectCard(selectedKanji, correctKanji, clickedIndex) {
         }
     }
 
+    let resultBox = document.getElementById("result");
     if (selectedKanji === correctKanji) {
-        document.getElementById("result").style.color = "#22c55e";
-        document.getElementById("result").innerText = "မှန်ကန်ပါတယ်! 🎉";
+        resultBox.style.color = "#22c55e";
+        resultBox.innerText = "မှန်ကန်ပါတယ်! 🎉";
     } else {
         cards[clickedIndex].classList.add("wrong");
-        document.getElementById("result").style.color = "#ef4444";
-        document.getElementById("result").innerText = "အဖြေမှားယွင်းနေပါတယ် ❌";
+        resultBox.style.color = "#ef4444";
+        resultBox.innerText = "အဖြေမှားယွင်းနေပါတယ် ❌";
     }
 
     document.getElementById("nextBtn").style.display = "inline-block";
 }
 
-// အချိန်ကုန်သွားသောအခါ
 function timeOutAction() {
     isAnswered = true;
     let cards = document.getElementsByClassName("card");
@@ -132,18 +142,20 @@ function timeOutAction() {
     }
 
     document.getElementById("timer").innerText = "အချိန်ကုန်သွားပါပြီ ⌛";
-    document.getElementById("result").style.color = "#ef4444";
-    document.getElementById("result").innerText = "အချိန်ကုန်သွားပါပြီ ❌";
+    let resultBox = document.getElementById("result");
+    resultBox.style.color = "#ef4444";
+    resultBox.innerText = "အချိန်ကုန်သွားပါပြီ ❌";
     
     document.getElementById("nextBtn").style.display = "inline-block";
 }
 
-// နောက်တစ်ပုဒ်သို့ သွားခြင်း
 function nextQuiz() {
-    currentIndex = (currentIndex + 1) % quizDatabase.length;
+    currentIndex = (currentIndex + 1) % window.quizDatabase.length;
     loadQuiz();
 }
 
-// App စတင်ခြင်း
-loadDatabase();
-loadQuiz();
+// Window Load ဖြစ်သည်နှင့် စတင်မည်
+window.onload = function() {
+    loadDatabase();
+    loadQuiz();
+};
