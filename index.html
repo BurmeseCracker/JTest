@@ -4,99 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kanji Card Quiz</title>
-    <style>
-        body { 
-            font-family: sans-serif; 
-            text-align: center; 
-            background: #f0f2f5; 
-            margin: 0;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-        
-        #timer { 
-            font-size: 20px; 
-            font-weight: bold; 
-            color: #F44336; 
-            margin-bottom: 10px; 
-        }
-
-        .quiz-header h2 {
-            margin: 5px 0;
-            color: #333;
-            font-size: 24px;
-        }
-
-        .cards-container { 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            gap: 12px; 
-            margin-bottom: 25px; 
-            flex-wrap: wrap; 
-        }
-
-        .card { 
-            background: white; 
-            width: 105px;  /* တွဲလုံးများအတွက် Card အကျယ်ကို ချဲ့ထားသည် */
-            height: 110px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-size: 42px; /* စာလုံးအရွယ်အစားကို အမြဲတမ်း ကြီးကြီးနှင့် တသမတ်တည်း ထားမည် */
-            border-radius: 12px; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
-            cursor: pointer;
-            border: 3px solid transparent;
-            transition: 0.2s;
-            user-select: none;
-        }
-
-        .card:hover { transform: scale(1.05); background: #fafafa; }
-
-        .question-wrapper {
-            margin-bottom: 20px;
-        }
-
-        #questionBox { 
-            font-size: 24px; 
-            font-weight: bold; 
-            color: #2c3e50; 
-            background: #fff;
-            display: inline-block;
-            padding: 12px 25px;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            max-width: 90%;
-        }
-
-        .correct { background: #4CAF50 !important; color: white; border-color: #2e7d32; }
-        .wrong { background: #F44336 !important; color: white; border-color: #c62828; }
-        
-        #result { margin-top: 15px; font-size: 18px; font-weight: bold; }
-        
-        #nextBtn { 
-            margin-top: 15px; 
-            padding: 12px 25px; 
-            font-size: 16px; 
-            cursor: pointer; 
-            display: none; 
-            background-color: #2196F3;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-
-        #nextBtn:hover { background-color: #0b7dda; }
-
-        @media (max-width: 480px) {
-            .card { width: 95px; height: 100px; font-size: 38px; }
-            #questionBox { font-size: 20px; padding: 10px 20px; }
-        }
-    </style>
+    <!-- သီးသန့်ခွဲထုတ်ထားသော style.css ကို ချိတ်ဆက်ခြင်း -->
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
+
+    <!-- Txt File Upload Section -->
+    <div class="upload-box">
+        <label for="txtFile">📁 Kanji .txt ဖိုင်တင်ရန်: </label>
+        <input type="file" id="txtFile" accept=".txt" onchange="handleTxtUpload(event)">
+    </div>
 
     <div id="timer">အချိန်: 5 စက္ကန့်</div>
 
@@ -115,7 +32,7 @@
         <button id="nextBtn" onclick="nextQuiz()">နောက်တစ်ပုဒ်သို့ (Next)</button>
     </div>
 
-    <!-- ဂျာဗားစක්‍ရिप्ट ဖိုင်များကို အစဉ်လိုက် ချိတ်ဆက်ခြင်း -->
+    <!-- JavaScript ဖိုင်များကို ချိတ်ဆက်ခြင်း -->
     <script src="kanji.js"></script>
     <script src="quiz.js"></script>
     <script src="ans.js"></script>
@@ -123,17 +40,60 @@
     <script>
         let quizDatabase = [];
 
-        // kanjiLists, questionLists နဲ့ answerLists (Kanji စာလုံးတိုက်ရိုက်) များကို ပေါင်းစပ်ခြင်း
-        if (typeof kanjiLists !== 'undefined' && typeof questionLists !== 'undefined' && typeof answerLists !== 'undefined') {
-            for (let i = 0; i < kanjiLists.length; i++) {
-                if (kanjiLists[i] && questionLists[i]) {
-                    quizDatabase.push({
-                        kanjis: kanjiLists[i],
-                        question: questionLists[i],
-                        correctKanji: answerLists[i] !== undefined ? answerLists[i] : kanjiLists[i][0]
-                    });
-                }
+        let activeKanjiLists = [];
+        let savedKanjiData = localStorage.getItem("uploadedKanjiLists");
+
+        if (savedKanjiData) {
+            activeKanjiLists = JSON.parse(savedKanjiData);
+        } else {
+            if (typeof kanjiLists !== 'undefined') {
+                activeKanjiLists = kanjiLists;
             }
+        }
+
+        if (activeKanjiLists.length > 0) {
+            for (let i = 0; i < activeKanjiLists.length; i++) {
+                let currentKanjiSet = activeKanjiLists[i];
+                let qText = "အခန်း (" + (i + 1) + ") - ရှာပါ။";
+                let correctK = currentKanjiSet[0]; 
+
+                if (typeof questionLists !== 'undefined' && questionLists[i]) {
+                    qText = questionLists[i];
+                }
+                if (typeof answerLists !== 'undefined' && answerLists[i]) {
+                    correctK = answerLists[i];
+                }
+
+                quizDatabase.push({
+                    kanjis: currentKanjiSet,
+                    question: qText,
+                    correctKanji: correctK
+                });
+            }
+        }
+
+        function handleTxtUpload(event) {
+            let file = event.target.files[0];
+            if (!file) return;
+
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                let text = e.target.result;
+                let lines = text.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
+                
+                let chunkedLists = [];
+                for (let i = 0; i < lines.length; i += 3) {
+                    let chunk = lines.slice(i, i + 3);
+                    if (chunk.length > 0) {
+                        chunkedLists.push(chunk);
+                    }
+                }
+
+                localStorage.setItem("uploadedKanjiLists", JSON.stringify(chunkedLists));
+                alert("Kanji စာရင်းများကို အောင်မြင်စွာ တင်ပြီး အခန်းများ ဖန်တီးပြီးပါပြီ! 🎉");
+                location.reload();
+            };
+            reader.readAsText(file);
         }
 
         let currentIndex = 0;
@@ -153,7 +113,7 @@
 
         function loadQuiz() {
             if (quizDatabase.length === 0) {
-                document.getElementById("questionBox").innerText = "JS ဖိုင်များ ချိတ်ဆက်မှု မမှန်ကန်ပါ";
+                document.getElementById("questionBox").innerText = "ကျေးဇူးပြု၍ Kanji .txt ဖိုင်တစ်ခုကို တင်ပေးပါ (သို့) kanji.js ထည့်ပါ။";
                 return;
             }
 
@@ -167,7 +127,6 @@
             document.getElementById("result").innerText = "";
             document.getElementById("nextBtn").style.display = "none";
 
-            // ans.js ထဲက သတ်မှတ်ထားသော အဖြေမှန် Kanji စာလုံးကို တိုက်ရိုက်ယူခြင်း
             currentCorrectOriginalKanji = current.correctKanji;
             let randomizedKanjis = shuffleArray(current.kanjis);
 
@@ -179,8 +138,6 @@
                 cardDiv.className = "card";
                 cardDiv.id = "card-" + index;
                 cardDiv.innerText = kanjiChar;
-                
-                // စာလုံးအရွယ်အစားကို တွဲလုံးဖြစ်စေ၊ တစ်လုံးတည်းဖြစ်စေ အမြဲတမ်း ကြီးကြီးနှင့် ညီညာစွာ ပြသမည်
                 cardDiv.style.fontSize = "42px";
 
                 cardDiv.onclick = () => selectCard(kanjiChar, currentCorrectOriginalKanji, index);
