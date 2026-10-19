@@ -31,19 +31,19 @@
             display: flex; 
             justify-content: center; 
             align-items: center; 
-            gap: 10px; 
+            gap: 12px; 
             margin-bottom: 25px; 
             flex-wrap: wrap; 
         }
 
         .card { 
             background: white; 
-            width: 85px; 
-            height: 105px; 
+            width: 105px;  /* တွဲလုံးများအတွက် Card အကျယ်ကို ချဲ့ထားသည် */
+            height: 110px; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
-            font-size: 45px; 
+            font-size: 42px; /* စာလုံးအရွယ်အစားကို အမြဲတမ်း ကြီးကြီးနှင့် တသမတ်တည်း ထားမည် */
             border-radius: 12px; 
             box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
             cursor: pointer;
@@ -91,7 +91,7 @@
         #nextBtn:hover { background-color: #0b7dda; }
 
         @media (max-width: 480px) {
-            .card { width: 75px; height: 95px; }
+            .card { width: 95px; height: 100px; font-size: 38px; }
             #questionBox { font-size: 20px; padding: 10px 20px; }
         }
     </style>
@@ -115,20 +115,22 @@
         <button id="nextBtn" onclick="nextQuiz()">နောက်တစ်ပုဒ်သို့ (Next)</button>
     </div>
 
-    <!-- kanji.js နဲ့ quiz.js ကို ချိတ်ဆက်ခြင်း -->
+    <!-- ဂျာဗားစක්‍ရिप्ट ဖိုင်များကို အစဉ်လိုက် ချိတ်ဆက်ခြင်း -->
     <script src="kanji.js"></script>
     <script src="quiz.js"></script>
+    <script src="ans.js"></script>
     
     <script>
         let quizDatabase = [];
 
-        if (typeof kanjiLists !== 'undefined' && typeof questionLists !== 'undefined') {
+        // kanjiLists, questionLists နဲ့ answerLists များကို ပေါင်းစပ်ခြင်း
+        if (typeof kanjiLists !== 'undefined' && typeof questionLists !== 'undefined' && typeof answerLists !== 'undefined') {
             for (let i = 0; i < kanjiLists.length; i++) {
                 if (kanjiLists[i] && questionLists[i]) {
                     quizDatabase.push({
                         kanjis: kanjiLists[i],
                         question: questionLists[i],
-                        correctIndex: 0
+                        correctIndex: answerLists[i] !== undefined ? answerLists[i] : 0
                     });
                 }
             }
@@ -151,7 +153,7 @@
 
         function loadQuiz() {
             if (quizDatabase.length === 0) {
-                document.getElementById("questionBox").innerText = "kanji.js သို့မဟုတ် quiz.js ဖိုင်ကို ရှာမတွေ့ပါ";
+                document.getElementById("questionBox").innerText = "JS ဖိုင်များ ချိတ်ဆက်မှု မမှန်ကန်ပါ";
                 return;
             }
 
@@ -177,12 +179,8 @@
                 cardDiv.id = "card-" + index;
                 cardDiv.innerText = kanjiChar;
                 
-                // စာလုံး ၂ လုံး သို့မဟုတ် ပိုပါက Card ပေါ်တွင် အလျားလိုက်လှပစေရန် Font size ချုံ့ပေးခြင်း
-                if (kanjiChar.length > 1) {
-                    cardDiv.style.fontSize = "26px";
-                } else {
-                    cardDiv.style.fontSize = "45px";
-                }
+                // စာလုံးအရွယ်အစားကို တွဲလုံးဖြစ်စေ၊ တစ်လုံးတည်းဖြစ်စေ အမြဲတမ်း ကြီးကြီးနှင့် ညီညာစွာ ပြသမည်
+                cardDiv.style.fontSize = "42px";
 
                 cardDiv.onclick = () => selectCard(kanjiChar, currentCorrectOriginalKanji, index);
                 cardsContainer.appendChild(cardDiv);
