@@ -47,7 +47,7 @@ function addKanjiInputBox() {
     let currentRows = container.getElementsByClassName("kanji-input-row").length;
     let limit = isHardcore ? 10 : 3;
     if (currentRows >= limit) {
-        alert(isHardcore ? "Compare Mode တွင် Kanji အများဆုံး ၁၀ ခုအထိ ထည့်နိုင်ပါသည်။[span_12](start_span)[span_12](end_span)[span_13](start_span)[span_13](end_span)" : "Normal Mode တွင် Kanji အများဆုံး ၃ ခုအထိ ထည့်နိုင်ပါသည်။[span_14](start_span)[span_14](end_span)[span_15](start_span)[span_15](end_span)");
+        alert(isHardcore ? "Compare Mode တွင် Kanji အများဆုံး ၁၀ ခုအထိ ထည့်နိုင်ပါသည်။" : "Normal Mode တွင် Kanji အများဆုံး ၃ ခုအထိ ထည့်နိုင်ပါသည်။");
         return;
     }
     let rowDiv = document.createElement("div");
@@ -63,7 +63,7 @@ function addKanjiInputBox() {
 function addHiraganaInputBox() {
     let isHardcore = document.getElementById("globalHardcoreSwitch").checked;
     let container = document.getElementById("hiraganaInputsContainer");
-    if (!isHardcore) { alert("Normal Mode တွင် Hiragana ၁ ခုသာ ထည့်နိုင်ပါသည်။[span_16](start_span)[span_16](end_span)[span_17](start_span)[span_17](end_span)"); return; }
+    if (!isHardcore) { alert("Normal Mode တွင် Hiragana ၁ ခုသာ ထည့်နိုင်ပါသည်။"); return; }
     let rowDiv = document.createElement("div");
     rowDiv.className = "hiragana-input-row";
     rowDiv.style.cssText = "display: flex; gap: 8px; margin-bottom: 10px; align-items: center; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;";
@@ -137,7 +137,7 @@ function addQuizSet() {
             isSentence: true,
             sentence: sentenceText,
             targetWord: targetWord,
-            underlineType: underlineType, // 'kanji' သို့မဟုတ် 'hiragana'
+            underlineType: underlineType,
             correctAnswer: correctAnswer
         });
 

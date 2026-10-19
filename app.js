@@ -8,6 +8,10 @@ let scoreCorrect = 0;
 let scoreTotal = 0;
 let hasShownStartModalThisSession = false;
 
+let selectedKanjiItem = null;
+let matchedPairsCount = 0;
+let hardcoreTotalPairs = 0;
+
 function loadDatabase() {
     let localData = localStorage.getItem("myBoxKanjiDB");
     window.quizDatabase = localData ? JSON.parse(localData) : [];
@@ -63,7 +67,7 @@ function startQuizMode(mode) {
     
     scoreTotal = filtered.length;
     if (scoreTotal === 0) {
-        alert("ဤ Mode အတွက် မေးခွန်းများ မရှိသေးပါ။[span_18](start_span)[span_18](end_span)[span_19](start_span)[span_19](end_span)");
+        alert("ဤ Mode အတွက် မေးခွန်းများ မရှိသေးပါ။");
         switchPage('dashboard');
         return;
     }
@@ -94,12 +98,11 @@ function startQuizRun() {
     let cContainer = document.getElementById("cardsContainer");
 
     if (currentQuizMode === 'sentence') {
-        // --- SENTENCE MODE (Underlined Q -> Options) ---[span_20](start_span)[span_20](end_span)[span_21](start_span)[span_21](end_span)
+        // --- SENTENCE MODE (Underlined Q -> Options) ---
         let sent = current.sentence;
         let target = current.targetWord;
         let correctAns = current.correctAnswer;
 
-        // စာကြောင်းထဲမှ target ကို မျဉ်းသားပြမည်
         let formattedSent = sent.replace(target, `<u style="text-decoration: underline; color: #2563eb; font-weight: bold;">${target}</u>`);
         qBox.innerHTML = `မျဉ်းသားထားသော စာလုံးအတွက် အဖြေကိုရွေးပါ:<br/><br/><span style="font-size: 20px;">${formattedSent}</span>`;
 
@@ -123,7 +126,7 @@ function startQuizRun() {
         });
 
     } else if (currentQuizMode === 'easy') {
-        // --- EASY MODE ---[span_22](start_span)[span_22](end_span)[span_23](start_span)[span_23](end_span)
+        // --- EASY MODE ---
         let qText = Array.isArray(current.question) ? current.question[0] : current.question;
         let correctKanji = typeof current.correctKanji === 'object' ? current.correctKanji[qText] : current.correctKanji;
         qBox.innerText = qText;
@@ -142,7 +145,7 @@ function startQuizRun() {
         });
 
     } else if (currentQuizMode === 'reverse_easy') {
-        // --- REVERSE EASY MODE ---[span_24](start_span)[span_24](end_span)[span_25](start_span)[span_25](end_span)
+        // --- REVERSE EASY MODE ---
         let hMap = typeof current.correctKanji === 'object' ? current.correctKanji : { [current.question]: current.correctKanji };
         let hKeys = Object.keys(hMap);
         let targetH = hKeys[0];
@@ -165,8 +168,8 @@ function startQuizRun() {
         });
 
     } else {
-        // --- COMPARE MODE ---[span_26](start_span)[span_26](end_span)[span_27](start_span)[span_27](end_span)
-        qBox.innerText = "🔥 Compare Mode: Kanji နှင့် Hiragana များကို တွဲဖက်ပါ[span_28](start_span)[span_28](end_span)[span_29](start_span)[span_29](end_span)";
+        // --- COMPARE MODE ---
+        qBox.innerText = "🔥 Compare Mode: Kanji နှင့် Hiragana များကို တွဲဖက်ပါ";
         let hiraganaMap = current.correctKanji;
         let kanjiToHiragana = {};
         for (let h in hiraganaMap) { kanjiToHiragana[hiraganaMap[h]] = h; }
