@@ -4,7 +4,6 @@ let timeLeft = 5;
 let timerInterval = null;
 let isAnswered = false;
 let currentCorrectOriginalKanji = "";
-let currentPage = 'quiz'; // 'quiz' သို့မဟုတ် 'dashboard'
 
 function loadDatabase() {
     let localData = localStorage.getItem("myBoxKanjiDB");
@@ -15,28 +14,48 @@ function loadDatabase() {
     }
 }
 
-// 🍔 Menu Icon ကို နှိပ်လိုက်တိုင်း Page နှစ်ခု အပြန်အလှန် ပြောင်းပေးမည့် Function
-function togglePage() {
+// ☰ Menu Toggle (Menu Pinned Dropdown ဖွင့်/ပိတ်)
+function toggleMenu() {
+    let dropdown = document.getElementById("menuDropdown");
+    dropdown.classList.toggle("show");
+}
+
+// Menu အပြင်ဘက်ကို နှိပ်လိုက်ရင် Menu Dropdown ပိတ်သွားစေရန်
+window.onclick = function(event) {
+    if (!event.target.matches('.hamburger-btn') && !event.target.matches('.hamburger-btn span')) {
+        let dropdown = document.getElementById("menuDropdown");
+        if (dropdown && dropdown.classList.contains('show')) {
+            dropdown.classList.remove('show');
+        }
+    }
+}
+
+// Page ရွေးချယ်ခြင်း
+function selectPage(pageName) {
     let quizPage = document.getElementById("quizPage");
     let dashPage = document.getElementById("dashboardPage");
     let headerTitle = document.getElementById("appHeaderTitle");
-    let menuBtn = document.getElementById("menuToggleBtn");
+    let itemQuiz = document.getElementById("menuItemQuiz");
+    let itemDash = document.getElementById("menuItemDash");
 
-    if (currentPage === 'quiz') {
-        currentPage = 'dashboard';
-        quizPage.classList.remove('active');
-        dashPage.classList.add('active');
-        headerTitle.innerText = "⚙️ Admin Dashboard";
-        menuBtn.innerText = "🎮"; // Quiz Mode သို့ ပြန်သွားရန် Icon ပြောင်းမည်
-        renderDashboard();
-    } else {
-        currentPage = 'quiz';
-        dashPage.classList.remove('active');
+    if (pageName === 'quiz') {
         quizPage.classList.add('active');
+        dashPage.classList.remove('active');
+        itemQuiz.classList.add('active');
+        itemDash.classList.remove('active');
         headerTitle.innerText = "🎮 Quiz Mode";
-        menuBtn.innerText = "⚙️"; // Dashboard သို့ သွားရန် Icon ပြောင်းမည်
         loadQuiz();
+    } else {
+        dashPage.classList.add('active');
+        quizPage.classList.remove('active');
+        itemDash.classList.add('active');
+        itemQuiz.classList.remove('active');
+        headerTitle.innerText = "⚙️ Admin Dashboard";
+        renderDashboard();
     }
+
+    // Menu ကို ပြန်ပိတ်မည်
+    document.getElementById("menuDropdown").classList.remove("show");
 }
 
 // Array Shuffle

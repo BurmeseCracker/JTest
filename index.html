@@ -8,15 +8,27 @@
 </head>
 <body>
 
-    <!-- 📱 Header with Left-side Menu Icon -->
+    <!-- Header with Left Hamburger Icon -->
     <header class="app-header-container">
-        <!-- ဘယ်ဘက်ထောင့်တွင် ရှိသော Menu Icon ခလုတ် (နှိပ်လျှင် Page ပြောင်းမည်) -->
-        <button id="menuToggleBtn" class="menu-toggle-btn" onclick="togglePage()" title="Menu ပြောင်းရန်">
-            ⚙️
+        <!-- ☰ ပုံပါအတိုင်း Hamburger Icon ခလုတ် -->
+        <button class="hamburger-btn" onclick="toggleMenu()" title="Menu ပွင့်ရန်">
+            <span></span>
+            <span></span>
+            <span></span>
         </button>
 
         <div class="brand-area">
             <h1 id="appHeaderTitle">🎮 Quiz Mode</h1>
+        </div>
+
+        <!-- 📂 Icon နှိပ်လျှင် ပွင့်လာမည့် Dropdown Menu -->
+        <div id="menuDropdown" class="menu-dropdown">
+            <button id="menuItemQuiz" class="menu-dropdown-item active" onclick="selectPage('quiz')">
+                🎮 Quiz Mode
+            </button>
+            <button id="menuItemDash" class="menu-dropdown-item" onclick="selectPage('dashboard')">
+                ⚙️ Admin Dashboard
+            </button>
         </div>
     </header>
 
@@ -77,7 +89,7 @@
         <div class="item-list" id="dashboardList"></div>
     </main>
 
-    <!-- Scripts (ကျန်တဲ့ kanji.js, quiz.js, ans.js, dashboard.js တို့က အရင်အတိုင်း ဆက်သုံးပါ) -->
+    <!-- Scripts -->
     <script src="kanji.js"></script>
     <script src="quiz.js"></script>
     <script src="ans.js"></script>
