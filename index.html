@@ -62,24 +62,22 @@
                 <button type="button" class="add-kanji-field-btn" onclick="addKanjiInputBox()">+ Add Kanji (ကွက်လပ်ထပ်ထည့်ရန်)</button>
             </div>
 
-            <!-- 🤹 Hiragana မေးခွန်းများကို ၁၀ ခုအထိ ထပ်ထည့်နိုင်ရန် Dynamic Container -->
+            <!-- 🤹 Hiragana မေးခွန်းများနှင့် အတန်းလိုက် အဖြေရွေးချယ်ရန် Container -->
             <div class="form-group">
-                <label>Hiragana မေးခွန်းများ (ဥပမာ: でんしゃ):</label>
+                <label>Hiragana မေးခွန်းများနှင့် ၎င်းတို့၏ အဖြေမှန် Kanji များ:</label>
                 <div id="hiraganaInputsContainer">
-                    <div class="hiragana-input-row" style="display: flex; gap: 8px; margin-bottom: 8px; align-items: center;">
-                        <input type="text" class="hiragana-box" placeholder="ဥပမာ: でんしゃ" style="flex: 1; padding: 10px; font-size: 16px; border: 1px solid #cbd5e1; border-radius: 8px;">
+                    <div class="hiragana-input-row" style="display: flex; gap: 8px; margin-bottom: 10px; align-items: center; flex-wrap: wrap; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                        <input type="text" class="hiragana-box" placeholder="Hiragana မေးခွန်း (ဥပမာ: でんしゃ)" style="flex: 2; min-width: 150px; padding: 9px; font-size: 15px; border: 1px solid #cbd5e1; border-radius: 6px;" required>
+                        
+                        <!-- ဤ Hiragana အတွက် အဖြေမှန် Kanji ရွေးရန် Dropdown -->
+                        <select class="row-answer-select" style="flex: 1; min-width: 100px; padding: 9px; font-size: 15px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; font-weight: bold; color: #2563eb;">
+                            <option value="">အဖြေမှန်ရွေးပါ</option>
+                        </select>
+
+                        <button type="button" class="remove-kanji-btn" onclick="this.parentElement.remove()">✕</button>
                     </div>
                 </div>
                 <button type="button" class="add-kanji-field-btn" onclick="addHiraganaInputBox()">+ Add Hiragana Question (မေးခွန်းကွက်လပ်ထပ်ထည့်ရန်)</button>
-            </div>
-
-            <!-- အဖြေမှန်ကို Click နှိပ်၍ ရွေးချယ်ရန် Container -->
-            <div class="form-group">
-                <label>အဖြေမှန် Kanji ကို အောက်ပါတို့မှ နှိပ်၍ ရွေးပါ (Click to select):</label>
-                <div id="answerSelectionContainer" style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 5px;">
-                    <span style="color: #64748b; font-size: 13px;">(ကျေးဇူးပြု၍ အထက်ပါ Kanji Box များတွင် စာထည့်ပါ)</span>
-                </div>
-                <input type="hidden" id="selectedAnswerInput">
             </div>
 
             <div class="btn-group">
