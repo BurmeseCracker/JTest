@@ -14,6 +14,7 @@ function renderDashboard() {
 
     window.quizDatabase.forEach((item, index) => {
         let kanjiBadges = item.kanjis.map(k => `<span class="kanji-badge">${k}</span>`).join("");
+        let questionsText = Array.isArray(item.question) ? item.question.join(", ") : item.question;
         let hardcoreBadge = item.isHardcore ? `<span style="background: #fee2e2; color: #ef4444; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; margin-left: 6px;">🔥 Hardcore</span>` : "";
         
         let itemDiv = document.createElement("div");
@@ -21,8 +22,7 @@ function renderDashboard() {
         itemDiv.innerHTML = `
             <div>
                 <div style="margin-bottom: 6px;">${kanjiBadges} ${hardcoreBadge}</div>
-                <div style="font-size: 14px; color: #475569;"><b>Hiragana:</b> ${item.question}</div>
-                <div style="font-size: 14px; color: #16a34a;"><b>အဖြေမှန်:</b> ${item.correctKanji}</div>
+                <div style="font-size: 14px; color: #475569;"><b>Hiragana:</b> ${questionsText}</div>
             </div>
             <button class="btn-danger" style="padding: 6px 12px; font-size: 13px;" onclick="deleteQuizItem(${index})">ဖျက်မည်</button>
         `;
@@ -31,11 +31,13 @@ function renderDashboard() {
 }
 
 function addKanjiInputBox() {
+    let isHardcore = document.getElementById("globalHardcoreSwitch").checked;
     let container = document.getElementById("kanjiInputsContainer");
     let currentRows = container.getElementsByClassName("kanji-input-row").length;
     
-    if (currentRows >= 15) {
-        alert("Kanji ကွက်လပ် အများဆုံး ၁၅ ခုအထိသာ ထည့်သွင်းနိုင်ပါသည်။");
+    let limit = isHardcore ? 10 : 3;
+    if (currentRows >= limit) {
+        alert(isHardcore ? "Hardcore Mode တွင် Kanji ကွက်လပ် အများဆုံး ၁၀ ခုအထိသာ ထည့်သွင်းနိုင်ပါသည်။" : "Normal Mode တွင် Kanji ကွက်လပ် အများဆုံး ၃ ခုအထိသာ ထည့်သွင်းနိုင်ပါသည်။ Hardcore Mode ဖွင့်ပါက ၁၀ ခုအထိ ထည့်နိုင်ပါသည်။");
         return;
     }
 
@@ -50,11 +52,17 @@ function addKanjiInputBox() {
 }
 
 function addHiraganaInputBox() {
+    let isHardcore = document.getElementById("globalHardcoreSwitch").checked;
     let container = document.getElementById("hiraganaInputsContainer");
     let currentRows = container.getElementsByClassName("hiragana-input-row").length;
     
-    if (currentRows >= 15) {
-        alert("Hiragana မေးခွန်းကွက်လပ် အများဆုံး ၁၅ ခုအထိသာ ထည့်သွင်းနိုင်ပါသည်။");
+    if (!isHardcore) {
+        alert("Normal Mode တွင် Hiragana မေးခွန်း ၁ ခုသာ ထည့်သွင်းနိုင်ပါသည်။ မေးခွန်းများ ပိုမိုထပ်ထည့်လိုပါက 'Hardcore Mode' Switch ကို ဖွင့်ပါ။");
+        return;
+    }
+
+    if (currentRows >= 10) {
+        alert("Hiragana မေးခွန်းကွက်လပ် အများဆုံး ၁၀ ခုအထိသာ ထည့်သွင်းနိုင်ပါသည်။");
         return;
     }
 
@@ -63,22 +71,32 @@ function addHiraganaInputBox() {
     rowDiv.style.cssText = "display: flex; gap: 8px; margin-bottom: 10px; align-items: center; flex-wrap: wrap; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;";
     
     rowDiv.innerHTML = `
-        <input type="text" class="hiragana-box" placeholder="Hiragana မေးခွန်းထည့်ရန်" style="flex: 2; min-width: 130px; padding: 9px; font-size: 15px; border: 1px solid #cbd5e1; border-radius: 6px;" required>
-        <select class="row-answer-select" style="flex: 1; min-width: 90px; padding: 9px; font-size: 15px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; font-weight: bold; color: #2563eb;">
+        <input type="text" class="hiragana-box" placeholder="Hiragana မေးခွန်း (ဥပမာ: でんしゃ)" style="flex: 2; min-width: 150px; padding: 9px; font-size: 15px; border: 1px solid #cbd5e1; border-radius: 6px;" required>
+        
+        <select class="row-answer-select" style="flex: 1; min-width: 100px; padding: 9px; font-size: 15px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; font-weight: bold; color: #2563eb;">
             <option value="">အဖြေမှန်ရွေးပါ</option>
         </select>
-        <div class="switch-container">
-            <span>Hardcore</span>
-            <label class="switch">
-                <input type="checkbox" class="hardcore-switch">
-                <span class="slider"></span>
-            </label>
-        </div>
+
         <button type="button" class="remove-kanji-btn" onclick="this.parentElement.remove()">✕</button>
     `;
+    
     container.appendChild(rowDiv);
     updateAllRowAnswerDropdowns();
 }
+
+document.addEventListener("change", function(e) {
+    if (e.target && e.target.id === "globalHardcoreSwitch") {
+        let isHardcore = e.target.checked;
+        let container = document.getElementById("hiraganaInputsContainer");
+        
+        if (!isHardcore && container) {
+            let rows = container.getElementsByClassName("hiragana-input-row");
+            while (rows.length > 1) {
+                rows[rows.length - 1].remove();
+            }
+        }
+    }
+});
 
 function updateAllRowAnswerDropdowns() {
     let kanjiBoxes = document.getElementsByClassName("kanji-box");
@@ -132,9 +150,8 @@ function addQuizSet() {
     }
 
     let hiraganaRows = document.getElementsByClassName("hiragana-input-row");
-    let newSetsCount = 0;
-
-    // ခေါင်းစဉ်ဘေးမှ Global Hardcore Switch ၏ အခြေအနေကို ယူမည်
+    let questionsList = [];
+    let answersMap = {};
     let isHardcore = document.getElementById("globalHardcoreSwitch").checked;
 
     loadDatabase();
@@ -156,27 +173,29 @@ function addQuizSet() {
                 return;
             }
 
-            window.quizDatabase.push({
-                kanjis: [...kanjis],
-                question: question,
-                correctKanji: correctKanji,
-                isHardcore: isHardcore
-            });
-            newSetsCount++;
+            questionsList.push(question);
+            answersMap[question] = correctKanji;
         }
     }
 
-    if (newSetsCount === 0) {
+    if (questionsList.length === 0) {
         alert("ကျေးဇူးပြု၍ Hiragana မေးခွန်း အနည်းဆုံး ၁ ခုနှင့် အဖြေမှန်ကို ဖြည့်စွက်ပါ။");
         return;
     }
 
-    localStorage.setItem("myBoxKanjiDB", JSON.stringify(window.quizDatabase));
-    alert("မေးခွန်းအသစ် " + newSetsCount + " ပုဒ် အောင်မြင်စွာ သိမ်းဆည်းပြီးပါပြီ! 🎉");
+    // မေးခွန်းသိမ်းဆည်းခြင်း (Hardcore ဖြစ်ပါက questions/answers များ အများကြီးပါဝင်မည်)
+    window.quizDatabase.push({
+        kanjis: [...kanjis],
+        question: isHardcore ? questionsList : questionsList[0],
+        correctKanji: isHardcore ? answersMap : answersMap[questionsList[0]],
+        isHardcore: isHardcore
+    });
 
-    // Reset Form Inputs
+    localStorage.setItem("myBoxKanjiDB", JSON.stringify(window.quizDatabase));
+    alert("မေးခွန်းအသစ် အောင်မြင်စွာ သိမ်းဆည်းပြီးပါပြီ! 🎉");
+
     for (let box of kanjiBoxes) box.value = "";
-    document.getElementById("globalHardcoreSwitch").checked = false; // Switch ကို ပြန်ပိတ်မည်
+    document.getElementById("globalHardcoreSwitch").checked = false;
     
     let hContainer = document.getElementById("hiraganaInputsContainer");
     hContainer.innerHTML = `
@@ -185,13 +204,11 @@ function addQuizSet() {
             <select class="row-answer-select" style="flex: 1; min-width: 100px; padding: 9px; font-size: 15px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; font-weight: bold; color: #2563eb;">
                 <option value="">အဖြေမှန်ရွေးပါ</option>
             </select>
-            <button type="button" class="remove-kanji-btn" onclick="this.parentElement.remove()">✕</button>
         </div>
     `;
     updateAllRowAnswerDropdowns();
     renderDashboard();
 }
-
 
 function deleteQuizItem(index) {
     if (confirm("ဤမေးခွန်းကို ဖျက်ရန် သေချာပါသလား?")) {

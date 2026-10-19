@@ -47,7 +47,7 @@
             <h3>+ မေးခွန်း / Kanji အချက်အလက်သစ် ထည့်သွင်းရန်</h3>
             
             <div class="form-group">
-                <label>Kanji စာလုံးများ (တစ်ကွက်လျှင် တစ်လုံး သို့မဟုတ် တွဲလုံး ၂ လုံးထည့်ပါ):</label>
+                <label>Kanji စာလုံးများ (Hardcore ON လလျှင် ၁၀ ခုအထိ ထည့်နိုင်သည်):</label>
                 <div id="kanjiInputsContainer">
                     <div class="kanji-input-row">
                         <input type="text" class="kanji-box" placeholder="ဥပမာ: 日" maxlength="3" required>
@@ -55,19 +55,15 @@
                     <div class="kanji-input-row">
                         <input type="text" class="kanji-box" placeholder="ဥပမာ: 月" maxlength="3" required>
                     </div>
-                    <div class="kanji-input-row">
-                        <input type="text" class="kanji-box" placeholder="ဥပမာ: 電車" maxlength="3" required>
-                    </div>
                 </div>
                 <button type="button" class="add-kanji-field-btn" onclick="addKanjiInputBox()">+ Add Kanji (ကွက်လပ်ထပ်ထည့်ရန်)</button>
             </div>
 
-                     <!-- 🤹 Hiragana မေးခွန်းများ (ခေါင်းစဉ်ဘေးတွင် Hardcore Switch ပါမည်) -->
+            <!-- 🤹 Hiragana မေးခွန်းများနှင့် Global Hardcore Switch -->
             <div class="form-group">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                    <label style="margin-bottom: 0;">Hiragana မေးခွန်းများ (ဥပမာ: でんしゃ):</label>
+                    <label style="margin-bottom: 0;">Hiragana မေးခွန်းများ နှင့် အဖြေများ:</label>
                     
-                    <!-- ခေါင်းစဉ်ဘေးမှ Hardcore Switch -->
                     <div class="switch-container">
                         <span>Hardcore Mode</span>
                         <label class="switch">
@@ -79,18 +75,15 @@
 
                 <div id="hiraganaInputsContainer">
                     <div class="hiragana-input-row" style="display: flex; gap: 8px; margin-bottom: 10px; align-items: center; flex-wrap: wrap; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0;">
-                        <input type="text" class="hiragana-box" placeholder="Hiragana မေးခွန်းထည့်ရန်" style="flex: 2; min-width: 150px; padding: 9px; font-size: 15px; border: 1px solid #cbd5e1; border-radius: 6px;" required>
+                        <input type="text" class="hiragana-box" placeholder="Hiragana မေးခွန်း (ဥပမာ: でんしゃ)" style="flex: 2; min-width: 150px; padding: 9px; font-size: 15px; border: 1px solid #cbd5e1; border-radius: 6px;" required>
                         
                         <select class="row-answer-select" style="flex: 1; min-width: 100px; padding: 9px; font-size: 15px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; font-weight: bold; color: #2563eb;">
                             <option value="">အဖြေမှန်ရွေးပါ</option>
                         </select>
-
-                        <button type="button" class="remove-kanji-btn" onclick="this.parentElement.remove()">✕</button>
                     </div>
                 </div>
                 <button type="button" class="add-kanji-field-btn" onclick="addHiraganaInputBox()">+ Add Hiragana Question (မေးခွန်းကွက်လပ်ထပ်ထည့်ရန်)</button>
             </div>
-
 
             <div class="btn-group">
                 <button class="btn-primary" onclick="addQuizSet()">+ သိမ်းဆည်းမည်</button>
@@ -123,7 +116,7 @@
         </div>
     </div>
 
-    <!-- 🎮 Quiz Mode Selection Start Modal (Easy or Hard Mode) -->
+    <!-- 🎮 Quiz Mode Selection Start Modal -->
     <div id="quizStartModal" class="backup-modal-overlay">
         <div class="backup-modal-card" style="text-align: center;">
             <h3 style="font-size: 20px; margin-bottom: 10px;">🎮 Kanji Quiz စတင်ရန် မုဒ်ကို ရွေးပါ</h3>
@@ -134,7 +127,7 @@
             </button>
             
             <button class="backup-option-btn" style="background: #ef4444; color: white; text-align: center; border: none; font-size: 16px; margin-bottom: 15px;" onclick="startQuizMode('hard')">
-                🔴 Hard Mode (Kanji & Hiragana အစုံအလင် / Hardcore)
+                🔴 Hardcore Mode (Kanji & Hiragana အစုံအလင်)
             </button>
 
             <button class="backup-close-btn" onclick="cancelQuizAction()">

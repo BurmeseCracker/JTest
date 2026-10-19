@@ -1,15 +1,18 @@
 window.quizDatabase = [];
 let currentIndex = 0;
-let timeLeft = 5;
+let timeLeft = 10;
 let timerInterval = null;
 let isAnswered = false;
-let currentCorrectOriginalKanji = "";
 
 // Quiz Session & Mode State
-let currentQuizMode = 'easy'; // 'easy' or 'hard'
+let currentQuizMode = 'easy'; 
 let scoreCorrect = 0;
 let scoreTotal = 0;
 let hasShownStartModalThisSession = false;
+
+// Hardcore Active Match State variables
+let activeHardcoreItems = [];
+let hardcoreCurrentPairIndex = 0;
 
 function loadDatabase() {
     let localData = localStorage.getItem("myBoxKanjiDB");
@@ -82,7 +85,6 @@ function loadQuiz() {
         return;
     }
 
-    // Session ပထမအကြိမ် ဝင်လျှင် Easy/Hard Mode ရွေးခိုင်းသည့် Modal ပြမည်
     if (!hasShownStartModalThisSession) {
         document.getElementById("quizStartModal").classList.add("show");
     } else {
@@ -90,7 +92,6 @@ function loadQuiz() {
     }
 }
 
-// User က Mode ရွေးလိုက်သည့်အခါ
 function startQuizMode(mode) {
     currentQuizMode = mode;
     hasShownStartModalThisSession = true;
@@ -98,7 +99,31 @@ function startQuizMode(mode) {
 
     currentIndex = 0;
     scoreCorrect = 0;
-    scoreTotal = window.quizDatabase.length;
+
+    if (currentQuizMode === 'hard') {
+        // Hardcore mode အတွက် ဒေတာများကို စုစည်းမည်
+        activeHardcoreItems = [];
+        window.quizDatabase.forEach(item => {
+            if (item.isHardcore && Array.isArray(item.question)) {
+                item.question.forEach(q => {
+                    activeHardcoreItems.push({
+                        kanjis: item.kanjis,
+                        question: q,
+                        correctKanji: item.correctKanji[q]
+                    });
+                });
+            }
+        });
+
+        if (activeHardcoreItems.length === 0) {
+            alert("Hardcore မေးခွန်းများ မရှိသေးပါ။ Dashboard တွင် Hardcore Switch ဖွင့်၍ မေးခွန်းအသစ်များ ထည့်ပါ။");
+            switchPage('dashboard');
+            return;
+        }
+        scoreTotal = activeHardcoreItems.length;
+    } else {
+        scoreTotal = window.quizDatabase.length;
+    }
 
     startQuizRun();
 }
@@ -110,25 +135,22 @@ function cancelQuizAction() {
 
 function startQuizRun() {
     clearInterval(timerInterval);
-    timeLeft = 5;
+    timeLeft = 10;
     isAnswered = false;
     
     let tBox = document.getElementById("timer");
     if (tBox) tBox.innerText = "အချိန်: " + timeLeft + " စက္ကန့်";
     
-    let current = window.quizDatabase[currentIndex];
-    let qBox = document.getElementById("questionBox");
-    if (qBox) qBox.innerText = current.question;
-    
-    document.getElementById("result").innerText = "";
-    document.getElementById("nextBtn").style.display = "none";
-
-    currentCorrectOriginalKanji = current.correctKanji;
-    
+    let currentQuestionText = "";
     let displayKanjis = [];
+    let currentCorrectOriginalKanji = "";
 
     if (currentQuizMode === 'easy') {
-        // Easy Mode: Kanji ကတ် ၃ ခုသာ (အဖြေမှန် ၁ ခု + အခြားရလဒ် ၂ ခု သို့မဟုတ် Random)
+        let current = window.quizDatabase[currentIndex];
+        // Easy Mode တွင် အကယ်၍ ထိုအကွက်သည် Hardcore ဖြစ်နေပါက ပထမဆုံး Hiragana ကို ယူမည်
+        currentQuestionText = Array.isArray(current.question) ? current.question[0] : current.question;
+        currentCorrectOriginalKanji = typeof current.correctKanji === 'object' ? current.correctKanji[currentQuestionText] : current.correctKanji;
+        
         displayKanjis = [currentCorrectOriginalKanji];
         let otherKanjis = current.kanjis.filter(k => k !== currentCorrectOriginalKanji);
         otherKanjis = shuffleArray(otherKanjis);
@@ -136,13 +158,21 @@ function startQuizRun() {
         for (let k of otherKanjis) {
             if (displayKanjis.length < 3) displayKanjis.push(k);
         }
-        // တစ်ခါတည်း ၃ ခုမပြည့်ရင်လည်း ရှိသလောက်ပြမယ်
         displayKanjis = shuffleArray(displayKanjis);
     } else {
-        // Hard Mode: Kanji ဘယ်လောက်ပါပါ အစုံအလင်ပြမည် (Hardcore ဖြစ်နေရင် ပိုပြီး ရှုပ်ထွေးနိုင်သည်)
-        displayKanjis = shuffleArray(current.kanjis);
+        // Hardcore Mode (မေးခွန်းကြီးထဲမှ တစ်ခုချင်းစီကို တစ်ပုဒ်စီ ထုတ်ပြမည်)
+        let item = activeHardcoreItems[currentIndex];
+        currentQuestionText = item.question;
+        currentCorrectOriginalKanji = item.correctKanji;
+        displayKanjis = shuffleArray(item.kanjis);
     }
 
+    let qBox = document.getElementById("questionBox");
+    if (qBox) qBox.innerText = currentQuestionText;
+    
+    document.getElementById("result").innerText = "";
+    document.getElementById("nextBtn").style.display = "none";
+    
     let cContainer = document.getElementById("cardsContainer");
     if (cContainer) {
         cContainer.innerHTML = "";
@@ -169,7 +199,16 @@ function startTimer() {
         if (timeLeft <= 0) {
             clearInterval(timerInterval);
             if (!isAnswered) {
-                timeOutAction();
+                // အချိန်ကုန်သွားပါက ပထမဆုံး card သို့မဟုတ် မှန်ကန်သော card ကို ဖော်ပြမည်
+                let cards = document.getElementsByClassName("card");
+                for (let i = 0; i < cards.length; i++) {
+                    cards[i].classList.add("wrong");
+                }
+                let resultBox = document.getElementById("result");
+                resultBox.style.color = "#ef4444";
+                resultBox.innerText = "အချိန်ကုန်သွားပါပြီ ⌛ ❌";
+                isAnswered = true;
+                document.getElementById("nextBtn").style.display = "inline-block";
             }
         }
     }, 1000);
@@ -201,27 +240,11 @@ function selectCard(selectedKanji, correctKanji, clickedIndex) {
     document.getElementById("nextBtn").style.display = "inline-block";
 }
 
-function timeOutAction() {
-    isAnswered = true;
-    let cards = document.getElementsByClassName("card");
-
-    for (let i = 0; i < cards.length; i++) {
-        if (cards[i].innerText === currentCorrectOriginalKanji) {
-            cards[i].classList.add("correct");
-        }
-    }
-
-    document.getElementById("timer").innerText = "အချိန်ကုန်သွားပါပြီ ⌛";
-    let resultBox = document.getElementById("result");
-    resultBox.style.color = "#ef4444";
-    resultBox.innerText = "အချိန်ကုန်သွားပါပြီ ❌";
-    
-    document.getElementById("nextBtn").style.display = "inline-block";
-}
-
 function nextQuiz() {
     currentIndex++;
-    if (currentIndex < window.quizDatabase.length) {
+    let totalLimit = currentQuizMode === 'hard' ? activeHardcoreItems.length : window.quizDatabase.length;
+    
+    if (currentIndex < totalLimit) {
         startQuizRun();
     } else {
         showResultsModal();
@@ -236,7 +259,7 @@ function showResultsModal() {
 
 function closeResultsModal() {
     document.getElementById("quizResultsModal").classList.remove("show");
-    hasShownStartModalThisSession = false; // Reset to show Mode selection on next session
+    hasShownStartModalThisSession = false;
     switchPage('dashboard');
 }
 
