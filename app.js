@@ -1,17 +1,12 @@
 window.quizDatabase = [];
 let currentIndex = 0;
-let timeLeft = 30;
+let timeLeft = 20;
 let timerInterval = null;
 let isAnswered = false;
-
 let currentQuizMode = 'easy'; 
 let scoreCorrect = 0;
 let scoreTotal = 0;
 let hasShownStartModalThisSession = false;
-
-let selectedKanjiItem = null;
-let matchedPairsCount = 0;
-let hardcoreTotalPairs = 0;
 
 function loadDatabase() {
     let localData = localStorage.getItem("myBoxKanjiDB");
@@ -20,33 +15,14 @@ function loadDatabase() {
 
 function toggleMenu() { document.getElementById("dropdownMenu").classList.toggle("show"); }
 
-window.onclick = function(event) {
-    if (!event.target.closest('.menu-icon-btn')) {
-        let menuBox = document.getElementById("dropdownMenu");
-        if (menuBox && menuBox.classList.contains('show')) menuBox.classList.remove('show');
-    }
-}
-
 function switchPage(pageName) {
-    let quizPage = document.getElementById("quizPage");
-    let dashPage = document.getElementById("dashboardPage");
-    let headerTitle = document.getElementById("headerTitleText");
-    let dropItemQuiz = document.getElementById("dropItemQuiz");
-    let dropItemDash = document.getElementById("dropItemDash");
-
     if (pageName === 'quiz') {
-        quizPage.classList.add('active');
-        dashPage.classList.remove('active');
-        dropItemQuiz.classList.add('active');
-        dropItemDash.classList.remove('active');
-        headerTitle.innerText = "🎮 Quiz Mode";
+        document.getElementById("quizPage").classList.add('active');
+        document.getElementById("dashboardPage").classList.remove('active');
         loadQuiz();
     } else {
-        dashPage.classList.add('active');
-        quizPage.classList.remove('active');
-        dropItemDash.classList.add('active');
-        dropItemQuiz.classList.remove('active');
-        headerTitle.innerText = "⚙️ Admin Dashboard";
+        document.getElementById("dashboardPage").classList.add('active');
+        document.getElementById("quizPage").classList.remove('active');
         renderDashboard();
     }
     document.getElementById("dropdownMenu").classList.remove("show");
@@ -63,17 +39,10 @@ function shuffleArray(array) {
 
 function loadQuiz() {
     loadDatabase();
-    let qBox = document.getElementById("questionBox");
-    let cContainer = document.getElementById("cardsContainer");
-    let tBox = document.getElementById("timer");
-
     if (window.quizDatabase.length === 0) {
-        if (qBox) qBox.innerText = "မေးခွန်းများ မရှိသေးပါ။ Dashboard သို့သွား၍ မေးခွန်းများ ထည့်ပါ။";
-        if (cContainer) cContainer.innerHTML = "";
-        if (tBox) tBox.innerText = "အချိန်: -";
+        document.getElementById("questionBox").innerText = "မေးခွန်းများ မရှိသေးပါ။";
         return;
     }
-
     if (!hasShownStartModalThisSession) {
         document.getElementById("quizStartModal").classList.add("show");
     } else {
@@ -88,16 +57,15 @@ function startQuizMode(mode) {
     currentIndex = 0;
     scoreCorrect = 0;
 
-    if (currentQuizMode === 'hard') {
-        let items = window.quizDatabase.filter(i => i.isHardcore);
-        if (items.length === 0) { alert("Compare Mode မေးခွန်းများ မရှိသေးပါ။[span_20](start_span)[span_20](end_span)[span_21](start_span)[span_21](end_span)"); switchPage('dashboard'); return; }
-        scoreTotal = items.length;
-    } else if (currentQuizMode === 'sentence') {
-        let items = window.quizDatabase.filter(i => i.sentence);
-        if (items.length === 0) { alert("Sentence Mode မေးခွန်းများ မရှိသေးပါ။[span_22](start_span)[span_22](end_span)[span_23](start_span)[span_23](end_span)"); switchPage('dashboard'); return; }
-        scoreTotal = items.length;
-    } else {
-        scoreTotal = window.quizDatabase.length;
+    let filtered = window.quizDatabase;
+    if (mode === 'hard') filtered = window.quizDatabase.filter(i => i.isHardcore);
+    if (mode === 'sentence') filtered = window.quizDatabase.filter(i => i.isSentence);
+    
+    scoreTotal = filtered.length;
+    if (scoreTotal === 0) {
+        alert("ဤ Mode အတွက် မေးခွန်းများ မရှိသေးပါ။[span_18](start_span)[span_18](end_span)[span_19](start_span)[span_19](end_span)");
+        switchPage('dashboard');
+        return;
     }
     startQuizRun();
 }
@@ -109,35 +77,59 @@ function cancelQuizAction() {
 
 function startQuizRun() {
     clearInterval(timerInterval);
-    timeLeft = currentQuizMode === 'hard' ? 45 : 15;
+    timeLeft = 20;
     isAnswered = false;
-    
-    let tBox = document.getElementById("timer");
-    if (tBox) tBox.innerText = "အချိန်: " + timeLeft + " စက္ကန့်";
-    
-    let qBox = document.getElementById("questionBox");
-    let cContainer = document.getElementById("cardsContainer");
-    let resultBox = document.getElementById("result");
-    resultBox.innerText = "";
+    document.getElementById("timer").innerText = "အချိန်: " + timeLeft + " စက္ကန့်";
+    document.getElementById("result").innerText = "";
     document.getElementById("nextBtn").style.display = "none";
 
     let activeList = currentQuizMode === 'hard' ? window.quizDatabase.filter(i => i.isHardcore) : 
-                     currentQuizMode === 'sentence' ? window.quizDatabase.filter(i => i.sentence) : 
+                     currentQuizMode === 'sentence' ? window.quizDatabase.filter(i => i.isSentence) : 
                      window.quizDatabase;
 
     let current = activeList[currentIndex];
     if (!current) { showResultsModal(); return; }
 
-    if (currentQuizMode === 'easy') {
-        // --- EASY MODE: Hiragana Q -> Kanji Cards ---[span_24](start_span)[span_24](end_span)[span_25](start_span)[span_25](end_span)
+    let qBox = document.getElementById("questionBox");
+    let cContainer = document.getElementById("cardsContainer");
+
+    if (currentQuizMode === 'sentence') {
+        // --- SENTENCE MODE (Underlined Q -> Options) ---[span_20](start_span)[span_20](end_span)[span_21](start_span)[span_21](end_span)
+        let sent = current.sentence;
+        let target = current.targetWord;
+        let correctAns = current.correctAnswer;
+
+        // စာကြောင်းထဲမှ target ကို မျဉ်းသားပြမည်
+        let formattedSent = sent.replace(target, `<u style="text-decoration: underline; color: #2563eb; font-weight: bold;">${target}</u>`);
+        qBox.innerHTML = `မျဉ်းသားထားသော စာလုံးအတွက် အဖြေကိုရွေးပါ:<br/><br/><span style="font-size: 20px;">${formattedSent}</span>`;
+
+        let displayChoices = [correctAns];
+        window.quizDatabase.forEach(item => {
+            if (item.correctAnswer && item.correctAnswer !== correctAns && displayChoices.length < 3) {
+                displayChoices.push(item.correctAnswer);
+            }
+        });
+        while (displayChoices.length < 3) displayChoices.push("dummy");
+
+        displayChoices = shuffleArray(displayChoices);
+        cContainer.innerHTML = "";
+        displayChoices.forEach(choice => {
+            let card = document.createElement("div");
+            card.className = "card";
+            card.style.fontSize = "18px";
+            card.innerText = choice;
+            card.onclick = () => selectStandardCard(choice, correctAns, card);
+            cContainer.appendChild(card);
+        });
+
+    } else if (currentQuizMode === 'easy') {
+        // --- EASY MODE ---[span_22](start_span)[span_22](end_span)[span_23](start_span)[span_23](end_span)
         let qText = Array.isArray(current.question) ? current.question[0] : current.question;
         let correctKanji = typeof current.correctKanji === 'object' ? current.correctKanji[qText] : current.correctKanji;
         qBox.innerText = qText;
         
         let displayKanjis = [correctKanji];
-        let others = current.kanjis.filter(k => k !== correctKanji);
-        others = shuffleArray(others);
-        for (let k of others) { if (displayKanjis.length < 3) displayKanjis.push(k); }
+        current.kanjis.forEach(k => { if (k !== correctKanji && displayKanjis.length < 3) displayKanjis.push(k); });
         displayKanjis = shuffleArray(displayKanjis);
 
         cContainer.innerHTML = "";
@@ -145,22 +137,21 @@ function startQuizRun() {
             let card = document.createElement("div");
             card.className = "card";
             card.innerText = kChar;
-            card.onclick = () => selectStandardCard(kChar, correctKanji, card, 'kanji');
+            card.onclick = () => selectStandardCard(kChar, correctKanji, card);
             cContainer.appendChild(card);
         });
 
     } else if (currentQuizMode === 'reverse_easy') {
-        // --- REVERSE EASY MODE: Kanji Q -> Hiragana Cards ---[span_26](start_span)[span_26](end_span)[span_27](start_span)[span_27](end_span)
+        // --- REVERSE EASY MODE ---[span_24](start_span)[span_24](end_span)[span_25](start_span)[span_25](end_span)
         let hMap = typeof current.correctKanji === 'object' ? current.correctKanji : { [current.question]: current.correctKanji };
         let hKeys = Object.keys(hMap);
         let targetH = hKeys[0];
         let targetK = hMap[targetH];
 
-        qBox.innerText = targetK; // Kanji မေးခွန်း
+        qBox.innerText = targetK;
 
         let displayHs = [targetH];
-        let others = hKeys.filter(h => h !== targetH);
-        for (let h of others) { if (displayHs.length < 3) displayHs.push(h); }
+        hKeys.forEach(h => { if (h !== targetH && displayHs.length < 3) displayHs.push(h); });
         displayHs = shuffleArray(displayHs);
 
         cContainer.innerHTML = "";
@@ -169,38 +160,13 @@ function startQuizRun() {
             card.className = "card";
             card.style.fontSize = "18px";
             card.innerText = hChar;
-            card.onclick = () => selectStandardCard(hChar, targetH, card, 'hiragana');
-            cContainer.appendChild(card);
-        });
-
-    } else if (currentQuizMode === 'sentence') {
-        // --- SENTENCE MODE: Underlined Hiragana -> Kanji Answers ---[span_28](start_span)[span_28](end_span)[span_29](start_span)[span_29](end_span)
-        let sent = current.sentence;
-        let targetH = current.sentenceTarget;
-        let correctK = current.sentenceAnswer;
-
-        // စာကြောင်းထဲမှ Hiragana အောက်မျဉ်းသားပြရန် <u> tag သုံးမည်
-        let formattedSent = sent.replace(targetH, `<u style="text-decoration: underline; color: #2563eb; font-weight: bold;">${targetH}</u>`);
-        qBox.innerHTML = `စာကြောင်းထဲမှ မျဉ်းသားထားသော စာလုံးအတွက် Kanji ကိုရွေးပါ:<br/><br/><span style="font-size: 20px;">${formattedSent}</span>`;
-
-        let displayKanjis = [correctK];
-        let others = current.kanjis.filter(k => k !== correctK);
-        others = shuffleArray(others);
-        for (let k of others) { if (displayKanjis.length < 3) displayKanjis.push(k); }
-        displayKanjis = shuffleArray(displayKanjis);
-
-        cContainer.innerHTML = "";
-        displayKanjis.forEach(kChar => {
-            let card = document.createElement("div");
-            card.className = "card";
-            card.innerText = kChar;
-            card.onclick = () => selectStandardCard(kChar, correctK, card, 'kanji');
+            card.onclick = () => selectStandardCard(hChar, targetH, card);
             cContainer.appendChild(card);
         });
 
     } else {
-        // --- COMPARE MODE ---[span_30](start_span)[span_30](end_span)[span_31](start_span)[span_31](end_span)
-        qBox.innerText = "🔥 Compare Mode: Kanji နှင့် Hiragana များကို တွဲဖက်ပါ[span_32](start_span)[span_32](end_span)[span_33](start_span)[span_33](end_span)";
+        // --- COMPARE MODE ---[span_26](start_span)[span_26](end_span)[span_27](start_span)[span_27](end_span)
+        qBox.innerText = "🔥 Compare Mode: Kanji နှင့် Hiragana များကို တွဲဖက်ပါ[span_28](start_span)[span_28](end_span)[span_29](start_span)[span_29](end_span)";
         let hiraganaMap = current.correctKanji;
         let kanjiToHiragana = {};
         for (let h in hiraganaMap) { kanjiToHiragana[hiraganaMap[h]] = h; }
@@ -243,7 +209,6 @@ function startQuizRun() {
             hBtn.className = "match-btn hiragana-match-btn";
             hBtn.innerText = hKey;
             hBtn.style.cssText = "padding: 10px 16px; font-size: 16px; font-weight: bold; background: #f8fafc; border: 2px solid #cbd5e1; border-radius: 8px; cursor: pointer;";
-            kBtn.onclick = () => {}; // dummy
             hBtn.onclick = () => {
                 if (hBtn.classList.contains('matched') || !selectedKanjiItem) return;
                 if (selectedKanjiItem.targetHiragana === hKey) {
@@ -263,8 +228,8 @@ function startQuizRun() {
                     if (matchedPairsCount === hardcoreTotalPairs) {
                         scoreCorrect++;
                         clearInterval(timerInterval);
-                        resultBox.style.color = "#22c55e";
-                        resultBox.innerText = "Compare Mode အားလုံး မှန်ကန်ပါတယ်! 🎉";
+                        document.getElementById("result").style.color = "#22c55e";
+                        document.getElementById("result").innerText = "Compare Mode အားလုံး မှန်ကန်ပါတယ်! 🎉";
                         isAnswered = true;
                         document.getElementById("nextBtn").style.display = "inline-block";
                     }
@@ -287,8 +252,7 @@ function startQuizRun() {
 function startTimer() {
     timerInterval = setInterval(() => {
         timeLeft--;
-        let tBox = document.getElementById("timer");
-        if (tBox) tBox.innerText = "အချိန်: " + timeLeft + " စက္ကန့်";
+        document.getElementById("timer").innerText = "အချိန်: " + timeLeft + " စက္ကန့်";
         if (timeLeft <= 0) {
             clearInterval(timerInterval);
             if (!isAnswered) {
@@ -302,15 +266,13 @@ function startTimer() {
     }, 1000);
 }
 
-function selectStandardCard(selectedVal, correctVal, cardElement, type) {
+function selectStandardCard(selectedVal, correctVal, cardElement) {
     if (isAnswered) return;
     isAnswered = true;
     clearInterval(timerInterval);
 
     let cards = document.getElementsByClassName("card");
-    for (let i = 0; i < cards.length; i++) {
-        if (cards[i].innerText === correctVal) cards[i].classList.add("correct");
-    }
+    for (let c of cards) { if (c.innerText === correctVal) c.classList.add("correct"); }
 
     let resultBox = document.getElementById("result");
     if (selectedVal === correctVal) {
@@ -328,7 +290,7 @@ function selectStandardCard(selectedVal, correctVal, cardElement, type) {
 function nextQuiz() {
     currentIndex++;
     let activeList = currentQuizMode === 'hard' ? window.quizDatabase.filter(i => i.isHardcore) : 
-                     currentQuizMode === 'sentence' ? window.quizDatabase.filter(i => i.sentence) : 
+                     currentQuizMode === 'sentence' ? window.quizDatabase.filter(i => i.isSentence) : 
                      window.quizDatabase;
 
     if (currentIndex < activeList.length) {
@@ -339,7 +301,7 @@ function nextQuiz() {
 }
 
 function showResultsModal() {
-    document.getElementById("quizScoreText").innerText = `မှန်ကန်မှု ရလဒ်: ${scoreCorrect} / ${scoreTotal} ပုဒ် (${currentQuizMode.toUpperCase()} Mode)`;
+    document.getElementById("quizScoreText").innerText = `ရလဒ်: ${scoreCorrect} / ${scoreTotal} ပုဒ်`;
     document.getElementById("quizResultsModal").classList.add("show");
 }
 
@@ -348,8 +310,3 @@ function closeResultsModal() {
     hasShownStartModalThisSession = false;
     switchPage('dashboard');
 }
-
-window.onload = function() {
-    loadDatabase();
-    loadQuiz();
-};
