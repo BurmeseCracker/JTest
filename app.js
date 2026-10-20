@@ -1,6 +1,6 @@
 window.quizDatabase = [];
 let currentIndex = 0;
-let timeLeft = 20;
+let timeLeft = 5; // ⏱️ အချိန်ကို 5 စက္ကန့်သို့ ပြောင်းထားသည်
 let timerInterval = null;
 let isAnswered = false;
 let currentQuizMode = 'easy'; 
@@ -81,7 +81,7 @@ function cancelQuizAction() {
 
 function startQuizRun() {
     clearInterval(timerInterval);
-    timeLeft = 20;
+    timeLeft = 5; // ⏱️ မေးခွန်းတိုင်းအတွက် အချိန်ကို 5 စက္ကန့် သတ်မှတ်သည်
     isAnswered = false;
     document.getElementById("timer").innerText = "အချိန်: " + timeLeft + " စက္ကန့်";
     document.getElementById("result").innerText = "";
@@ -98,7 +98,6 @@ function startQuizRun() {
     let cContainer = document.getElementById("cardsContainer");
 
     if (currentQuizMode === 'sentence') {
-        // --- SENTENCE MODE (Underlined Q -> Options) ---
         let sent = current.sentence;
         let target = current.targetWord;
         let correctAns = current.correctAnswer;
@@ -126,7 +125,6 @@ function startQuizRun() {
         });
 
     } else if (currentQuizMode === 'easy') {
-        // --- EASY MODE ---
         let qText = Array.isArray(current.question) ? current.question[0] : current.question;
         let correctKanji = typeof current.correctKanji === 'object' ? current.correctKanji[qText] : current.correctKanji;
         qBox.innerText = qText;
@@ -145,7 +143,6 @@ function startQuizRun() {
         });
 
     } else if (currentQuizMode === 'reverse_easy') {
-        // --- REVERSE EASY MODE ---
         let hMap = typeof current.correctKanji === 'object' ? current.correctKanji : { [current.question]: current.correctKanji };
         let hKeys = Object.keys(hMap);
         let targetH = hKeys[0];
@@ -168,7 +165,6 @@ function startQuizRun() {
         });
 
     } else {
-        // --- COMPARE MODE ---
         qBox.innerText = "🔥 Compare Mode: Kanji နှင့် Hiragana များကို တွဲဖက်ပါ";
         let hiraganaMap = current.correctKanji;
         let kanjiToHiragana = {};
